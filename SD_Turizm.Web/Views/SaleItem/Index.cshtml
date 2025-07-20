@@ -1,0 +1,121 @@
+@model IEnumerable<SD_Turizm.Web.Models.DTOs.SaleItemDto>
+
+@{
+    ViewData["Title"] = "Satış Öğesi Listesi";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-primary rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-tags fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Satış Öğesi Listesi</h1>
+                <p class="text-muted mb-0">Tüm satış öğelerinizi görüntüleyin ve yönetin</p>
+            </div>
+        </div>
+        <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+            <i class="fas fa-plus me-2"></i>Yeni Satış Öğesi
+        </a>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-list me-2"></i>Satış Öğeleri
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="saleItemTable" width="100%" cellspacing="0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Satış ID</th>
+                            <th>Öğe Tipi</th>
+                            <th>Öğe ID</th>
+                            <th>Miktar</th>
+                            <th>Fiyat</th>
+                            <th>Toplam</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.SaleId</td>
+                                <td>
+                                    @switch (item.ItemType)
+                                    {
+                                        case "Hotel":
+                                            <span class="badge bg-info">Otel</span>
+                                            break;
+                                        case "Tour":
+                                            <span class="badge bg-success">Tur</span>
+                                            break;
+                                        case "Transfer":
+                                            <span class="badge bg-warning text-dark">Transfer</span>
+                                            break;
+                                        case "RentACar":
+                                            <span class="badge bg-secondary">Araç Kiralama</span>
+                                            break;
+                                        case "Guide":
+                                            <span class="badge bg-primary">Rehber</span>
+                                            break;
+                                        case "Airline":
+                                            <span class="badge bg-info">Havayolu</span>
+                                            break;
+                                        case "Cruise":
+                                            <span class="badge bg-primary">Kruvaziyer</span>
+                                            break;
+                                        case "Package":
+                                            <span class="badge bg-dark">Paket</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@item.ItemType</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@item.ItemId</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.UnitPrice.ToString("N2")</td>
+                                <td>@item.TotalPrice.ToString("N2")</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#saleItemTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                },
+                responsive: true,
+                pageLength: 25,
+                order: [[0, 'desc']]
+            });
+        });
+    </script>
+} 

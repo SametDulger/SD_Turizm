@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SD Turizm</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SD_Turizm.Web.styles.css" asp-append-version="true" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-globe"></i> SD Turizm
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home"></i> Ana Sayfa
+                            </a>
+                        </li>
+                        
+                        <!-- Sales Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="salesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-shopping-cart"></i> Satış
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="salesDropdown">
+                                <li><a class="dropdown-item" asp-controller="Sales" asp-action="Index">Satış Listesi</a></li>
+                                <li><a class="dropdown-item" asp-controller="Sales" asp-action="Create">Yeni Satış</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="SaleItem" asp-action="Index">Satış Kalemleri</a></li>
+                                <li><a class="dropdown-item" asp-controller="SalePerson" asp-action="Index">Satış Kişileri</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Hotels Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="hotelsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-hotel"></i> Oteller
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="hotelsDropdown">
+                                <li><a class="dropdown-item" asp-controller="Hotels" asp-action="Index">Otel Listesi</a></li>
+                                <li><a class="dropdown-item" asp-controller="Hotels" asp-action="Create">Yeni Otel</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="HotelPrice" asp-action="Index">Otel Fiyatları</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Tours Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="toursDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-map-marked-alt"></i> Turlar
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="toursDropdown">
+                                <li><a class="dropdown-item" asp-controller="TourOperators" asp-action="Index">Tur Operatörleri</a></li>
+                                <li><a class="dropdown-item" asp-controller="Tour" asp-action="Index">Turlar</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="TourPrice" asp-action="Index">Tur Fiyatları</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Transportation Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="transportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-car"></i> Ulaşım
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="transportDropdown">
+                                <li><a class="dropdown-item" asp-controller="TransferCompany" asp-action="Index">Transfer Şirketleri</a></li>
+                                <li><a class="dropdown-item" asp-controller="TransferPrice" asp-action="Index">Transfer Fiyatları</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="RentACar" asp-action="Index">Araç Kiralama</a></li>
+                                <li><a class="dropdown-item" asp-controller="RentACarPrice" asp-action="Index">Kiralama Fiyatları</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Other Services Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-cogs"></i> Hizmetler
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
+                                <li><a class="dropdown-item" asp-controller="Airline" asp-action="Index">Havayolları</a></li>
+                                <li><a class="dropdown-item" asp-controller="AirlinePrice" asp-action="Index">Uçak Fiyatları</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="Cruise" asp-action="Index">Kruvaziyer</a></li>
+                                <li><a class="dropdown-item" asp-controller="CruisePrice" asp-action="Index">Kruvaziyer Fiyatları</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="Guide" asp-action="Index">Rehberler</a></li>
+                                <li><a class="dropdown-item" asp-controller="GuidePrice" asp-action="Index">Rehber Fiyatları</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- System Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="systemDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-tools"></i> Sistem
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="systemDropdown">
+                                <li><a class="dropdown-item" asp-controller="Address" asp-action="Index">Adresler</a></li>
+                                <li><a class="dropdown-item" asp-controller="ExchangeRate" asp-action="Index">Döviz Kurları</a></li>
+                                <li><a class="dropdown-item" asp-controller="CariTransaction" asp-action="Index">Cari İşlemler</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="Package" asp-action="Index">Paketler</a></li>
+                                <li><a class="dropdown-item" asp-controller="PackageItem" asp-action="Index">Paket Kalemleri</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Reports Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-chart-bar"></i> Raporlar
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+                                <li><a class="dropdown-item" asp-controller="Reports" asp-action="Index">Raporlar Ana Sayfa</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="Reports" asp-action="SalesReport">Satış Raporu</a></li>
+                                <li><a class="dropdown-item" asp-controller="Reports" asp-action="FinancialReport">Finansal Rapor</a></li>
+                                <li><a class="dropdown-item" asp-controller="Reports" asp-action="CustomerReport">Müşteri Raporu</a></li>
+                                <li><a class="dropdown-item" asp-controller="Reports" asp-action="ProductReport">Ürün Raporu</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    
+                    <!-- Right side navbar items -->
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <span class="navbar-text">
+                                <i class="fas fa-clock"></i> @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    &copy; @DateTime.Now.Year - SD Turizm - Tüm hakları saklıdır
+                </div>
+                <div class="col-md-6 text-end">
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-muted">Gizlilik</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script>
+        // Global JavaScript functions
+        function showLoading() {
+            // Show loading spinner
+            $('#loadingSpinner').show();
+        }
+        
+        function hideLoading() {
+            // Hide loading spinner
+            $('#loadingSpinner').hide();
+        }
+        
+        // Initialize DataTables with Turkish language
+        $(document).ready(function() {
+            if ($.fn.DataTable) {
+                $.extend(true, $.fn.dataTable.defaults, {
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Turkish.json"
+                    }
+                });
+            }
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

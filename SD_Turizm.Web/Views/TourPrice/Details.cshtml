@@ -1,0 +1,51 @@
+@model SD_Turizm.Web.Models.DTOs.TourPriceDto
+
+@{
+    ViewData["Title"] = "Tur Fiyat Detayları";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-info rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-info-circle fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Tur Fiyat Detayları</h1>
+                <p class="text-muted mb-0">Tur fiyat bilgilerini görüntüleyin</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 fw-bold">Tur Fiyat Bilgileri</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-2">Tur ID</dt>
+                <dd class="col-sm-10">@Model.TourId</dd>
+                
+                <dt class="col-sm-2">Fiyat</dt>
+                <dd class="col-sm-10">@Model.Price</dd>
+                
+                <dt class="col-sm-2">Para Birimi</dt>
+                <dd class="col-sm-10">@Model.Currency</dd>
+                
+                <dt class="col-sm-2">Geçerlilik Başlangıcı</dt>
+                <dd class="col-sm-10">@Model.ValidFrom.ToShortDateString()</dd>
+                
+                <dt class="col-sm-2">Geçerlilik Bitişi</dt>
+                <dd class="col-sm-10">@Model.ValidTo.ToShortDateString()</dd>
+            </dl>
+            
+            <div>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Düzenle</a>
+                <a asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+            </div>
+        </div>
+    </div>
+</div> 

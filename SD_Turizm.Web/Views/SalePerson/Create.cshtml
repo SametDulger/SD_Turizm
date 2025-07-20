@@ -1,0 +1,136 @@
+@model SD_Turizm.Web.Models.DTOs.SalePersonDto
+
+@{
+    ViewData["Title"] = "Satış Kişisi Ekle";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-primary rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-user-plus fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Satış Personeli Ekle</h1>
+                <p class="text-muted mb-0">Yeni bir satış personeli kaydı oluşturun</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-plus me-2"></i>Yeni Satış Personeli
+            </h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="SaleId" class="form-label">
+                                <i class="fas fa-id-card me-1"></i>Satış
+                            </label>
+                            <select asp-for="SaleId" class="form-select" asp-items="ViewBag.Sales" required>
+                                <option value="">Satış Seçin</option>
+                            </select>
+                            <span asp-validation-for="SaleId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="PersonType" class="form-label">
+                                <i class="fas fa-users me-1"></i>Kişi Tipi
+                            </label>
+                            <select asp-for="PersonType" class="form-select" required>
+                                <option value="">Kişi Tipi Seçin</option>
+                                <option value="Adult">Yetişkin</option>
+                                <option value="Child">Çocuk</option>
+                                <option value="Infant">Bebek</option>
+                            </select>
+                            <span asp-validation-for="PersonType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="FirstName" class="form-label">
+                                <i class="fas fa-user me-1"></i>Ad
+                            </label>
+                            <input asp-for="FirstName" class="form-control" required />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="LastName" class="form-label">
+                                <i class="fas fa-user me-1"></i>Soyad
+                            </label>
+                            <input asp-for="LastName" class="form-control" required />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="BirthDate" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Doğum Tarihi
+                            </label>
+                            <input asp-for="BirthDate" class="form-control" type="date" required />
+                            <span asp-validation-for="BirthDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="PassportNumber" class="form-label">
+                                <i class="fas fa-passport me-1"></i>Pasaport Numarası
+                            </label>
+                            <input asp-for="PassportNumber" class="form-control" />
+                            <span asp-validation-for="PassportNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Kaydet
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Bootstrap 5 validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+} 

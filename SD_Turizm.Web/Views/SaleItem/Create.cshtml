@@ -1,0 +1,129 @@
+@model SD_Turizm.Web.Models.DTOs.SaleItemDto
+
+@{
+    ViewData["Title"] = "Satış Öğesi Ekle";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-primary rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-tags fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Satış Kalemi Ekle</h1>
+                <p class="text-muted mb-0">Yeni bir satış kalemi kaydı oluşturun</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-plus me-2"></i>Yeni Satış Kalemi
+            </h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="SaleId" class="form-label">
+                                <i class="fas fa-id-card me-1"></i>Satış
+                            </label>
+                            <select asp-for="SaleId" class="form-select" asp-items="ViewBag.Sales" required>
+                                <option value="">Satış Seçin</option>
+                            </select>
+                            <span asp-validation-for="SaleId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="ItemType" class="form-label">
+                                <i class="fas fa-tags me-1"></i>Öğe Tipi
+                            </label>
+                            <select asp-for="ItemType" class="form-select" required>
+                                <option value="">Öğe Tipi Seçin</option>
+                                <option value="Hotel">Otel</option>
+                                <option value="Tour">Tur</option>
+                                <option value="Transfer">Transfer</option>
+                                <option value="RentACar">Araç Kiralama</option>
+                                <option value="Guide">Rehber</option>
+                                <option value="Airline">Havayolu</option>
+                                <option value="Cruise">Kruvaziyer</option>
+                                <option value="Package">Paket</option>
+                            </select>
+                            <span asp-validation-for="ItemType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="ItemId" class="form-label">
+                                <i class="fas fa-hashtag me-1"></i>Öğe ID
+                            </label>
+                            <input asp-for="ItemId" class="form-control" required />
+                            <span asp-validation-for="ItemId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="Quantity" class="form-label">
+                                <i class="fas fa-sort-numeric-up me-1"></i>Miktar
+                            </label>
+                            <input asp-for="Quantity" class="form-control" type="number" min="1" required />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label">
+                                <i class="fas fa-money-bill-wave me-1"></i>Fiyat
+                            </label>
+                            <input asp-for="Price" class="form-control" type="number" step="0.01" required />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Kaydet
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Bootstrap 5 validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+} 

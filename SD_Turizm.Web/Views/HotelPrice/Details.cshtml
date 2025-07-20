@@ -1,0 +1,76 @@
+@model SD_Turizm.Web.Models.DTOs.HotelPriceDto
+
+@{
+    ViewData["Title"] = "Otel Fiyatı Detayları";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-info rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-info-circle fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Otel Fiyat Detayları</h1>
+                <p class="text-muted mb-0">Otel fiyat bilgilerini görüntüleyin</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-info text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-info-circle me-2"></i>Otel Fiyat Bilgileri
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4"><i class="fas fa-hotel"></i> Otel</dt>
+                        <dd class="col-sm-8">@ViewBag.HotelName</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-bed"></i> Oda Tipi</dt>
+                        <dd class="col-sm-8">@Model.RoomType</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-utensils"></i> Pansiyon Tipi</dt>
+                        <dd class="col-sm-8">@Model.BoardType</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-dollar-sign"></i> Fiyat</dt>
+                        <dd class="col-sm-8">@Model.Price.ToString("N2") @Model.Currency</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-calendar"></i> Tarih</dt>
+                        <dd class="col-sm-8">@Model.Date.ToShortDateString()</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4"><i class="fas fa-user"></i> Yetişkin Fiyatı</dt>
+                        <dd class="col-sm-8">@Model.AdultPrice.ToString("N2") @Model.Currency</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-child"></i> Çocuk Fiyatı</dt>
+                        <dd class="col-sm-8">@Model.ChildPrice.ToString("N2") @Model.Currency</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-baby"></i> Bebek Fiyatı</dt>
+                        <dd class="col-sm-8">@Model.InfantPrice.ToString("N2") @Model.Currency</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-map-marker-alt"></i> Oda Konumu</dt>
+                        <dd class="col-sm-8">@Model.RoomLocation</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Düzenle
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-list"></i> Listeye Dön
+        </a>
+    </div>
+</div> 

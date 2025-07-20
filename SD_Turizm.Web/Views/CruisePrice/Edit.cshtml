@@ -1,0 +1,125 @@
+@model SD_Turizm.Web.Models.DTOs.CruisePriceDto
+
+@{
+    ViewData["Title"] = "Kruvaziyer Fiyatı Düzenle";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-primary rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-edit fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Kruvaziyer Fiyatı Düzenle</h1>
+                <p class="text-muted mb-0">Kruvaziyer fiyat bilgilerini güncelleyin</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-warning text-dark">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-edit me-2"></i>Kruvaziyer Fiyatı Düzenleme
+            </h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CruiseId" class="form-label"><i class="fas fa-ship"></i> Kruvaziyer</label>
+                        <select asp-for="CruiseId" class="form-select" asp-items="ViewBag.CruiseId" required>
+                            <option value="">Kruvaziyer Seçin</option>
+                        </select>
+                        <span asp-validation-for="CruiseId" class="text-danger small"></span>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CabinType" class="form-label"><i class="fas fa-bed"></i> Kabin Tipi</label>
+                        <input asp-for="CabinType" class="form-control" required />
+                        <span asp-validation-for="CabinType" class="text-danger small"></span>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Price" class="form-label"><i class="fas fa-dollar-sign"></i> Fiyat</label>
+                        <input asp-for="Price" class="form-control" type="number" step="0.01" required />
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Currency" class="form-label"><i class="fas fa-money-bill-wave"></i> Para Birimi</label>
+                        <select asp-for="Currency" class="form-select" required>
+                            <option value="">Para Birimi Seçin</option>
+                            <option value="EUR">EUR</option>
+                            <option value="USD">USD</option>
+                            <option value="TRY">TRY</option>
+                        </select>
+                        <span asp-validation-for="Currency" class="text-danger small"></span>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Date" class="form-label"><i class="fas fa-calendar"></i> Tarih</label>
+                        <input asp-for="Date" class="form-control" type="date" required />
+                        <span asp-validation-for="Date" class="text-danger small"></span>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="AdultPrice" class="form-label"><i class="fas fa-user"></i> Yetişkin Fiyatı</label>
+                        <input asp-for="AdultPrice" class="form-control" type="number" step="0.01" required />
+                        <span asp-validation-for="AdultPrice" class="text-danger small"></span>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ChildPrice" class="form-label"><i class="fas fa-child"></i> Çocuk Fiyatı</label>
+                        <input asp-for="ChildPrice" class="form-control" type="number" step="0.01" required />
+                        <span asp-validation-for="ChildPrice" class="text-danger small"></span>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="InfantPrice" class="form-label"><i class="fas fa-baby"></i> Bebek Fiyatı</label>
+                        <input asp-for="InfantPrice" class="form-control" type="number" step="0.01" required />
+                        <span asp-validation-for="InfantPrice" class="text-danger small"></span>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Kaydet</button>
+                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+} 

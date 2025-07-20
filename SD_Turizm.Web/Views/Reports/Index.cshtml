@@ -1,0 +1,148 @@
+@{
+    ViewData["Title"] = "Raporlar";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-primary rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-chart-bar fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Raporlar</h1>
+                <p class="text-muted mb-0">Tüm raporlarınızı görüntüleyin ve analiz edin</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Satış Raporu -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                Satış Raporu
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">Günlük, Haftalık, Aylık</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="@Url.Action("SalesReport", "Reports")" class="btn btn-primary btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finansal Rapor -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                Finansal Rapor
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">Gelir, Gider, Kar</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="@Url.Action("FinancialReport", "Reports")" class="btn btn-success btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Müşteri Raporu -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                                Müşteri Raporu
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">Müşteri Analizi</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="@Url.Action("CustomerReport", "Reports")" class="btn btn-info btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ürün Raporu -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                Ürün Raporu
+                            </div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">Ürün Performansı</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="@Url.Action("ProductReport", "Reports")" class="btn btn-warning btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hızlı İstatistikler -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary text-white">
+                    <h6 class="m-0 fw-bold">
+                        <i class="fas fa-chart-line me-2"></i>Hızlı İstatistikler
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <div class="h4 text-primary">₺@(ViewBag.MonthlySales?.ToString("N0") ?? "0")</div>
+                            <div class="small text-muted">Bu Ay Toplam Satış</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="h4 text-success">₺@(ViewBag.WeeklySales?.ToString("N0") ?? "0")</div>
+                            <div class="small text-muted">Bu Hafta Satış</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="h4 text-info">@(ViewBag.TotalCustomers?.ToString() ?? "0")</div>
+                            <div class="small text-muted">Toplam Müşteri</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="h4 text-warning">@(ViewBag.ActivePackages?.ToString() ?? "0")</div>
+                            <div class="small text-muted">Aktif Paket</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

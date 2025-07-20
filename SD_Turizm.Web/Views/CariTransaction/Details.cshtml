@@ -1,0 +1,60 @@
+@model SD_Turizm.Web.Models.DTOs.CariTransactionDto
+
+@{
+    ViewData["Title"] = "Cari İşlem Detayları";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-info rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-info-circle fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Cari İşlem Detayları</h1>
+                <p class="text-muted mb-0">Cari işlem bilgilerini görüntüleyin</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="fas fa-money-bill-wave"></i> Cari İşlem Bilgileri</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-hashtag"></i> ID</dt>
+                <dd class="col-sm-9 col-md-10">@Model.Id</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-barcode"></i> Cari Kodu</dt>
+                <dd class="col-sm-9 col-md-10">@Model.CariCode</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-user"></i> Müşteri Adı</dt>
+                <dd class="col-sm-9 col-md-10">@Model.CustomerName</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-exchange-alt"></i> İşlem Tipi</dt>
+                <dd class="col-sm-9 col-md-10">@Model.TransactionType</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-money-bill-wave"></i> Tutar</dt>
+                <dd class="col-sm-9 col-md-10">@Model.Amount</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-coins"></i> Para Birimi</dt>
+                <dd class="col-sm-9 col-md-10">@Model.Currency</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-calendar"></i> İşlem Tarihi</dt>
+                <dd class="col-sm-9 col-md-10">@Model.TransactionDate.ToString("dd/MM/yyyy")</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-info-circle"></i> Açıklama</dt>
+                <dd class="col-sm-9 col-md-10">@Model.Description</dd>
+            </dl>
+            
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><i class="fas fa-edit"></i> Düzenle</a>
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-list"></i> Listeye Dön</a>
+            </div>
+        </div>
+    </div>
+</div> 

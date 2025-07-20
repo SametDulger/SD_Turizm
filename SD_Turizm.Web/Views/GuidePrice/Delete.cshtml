@@ -1,0 +1,65 @@
+@model SD_Turizm.Web.Models.DTOs.GuidePriceDto
+
+@{
+    ViewData["Title"] = "Rehber Fiyatı Sil";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-danger rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-trash fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Rehber Fiyatı Sil</h1>
+                <p class="text-muted mb-0">Rehber fiyat kaydını silin</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">
+            <i class="fas fa-exclamation-triangle me-2"></i>Bu rehber fiyatını silmek istediğinizden emin misiniz?
+        </h4>
+        <p class="mb-0">Bu rehber fiyatını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-danger text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-info-circle me-2"></i> Silinecek Rehber Fiyatı Bilgileri
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4"><i class="fas fa-user-tie"></i> Rehber</dt>
+                        <dd class="col-sm-8">@ViewBag.GuideName</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-dollar-sign"></i> Fiyat</dt>
+                        <dd class="col-sm-8">@Model.Price.ToString("N2") @Model.Currency</dd>
+                        
+                        <dt class="col-sm-4"><i class="fas fa-calendar"></i> Tarih</dt>
+                        <dd class="col-sm-8">@Model.Date.ToShortDateString()</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Sil
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-times"></i> İptal
+            </a>
+        </div>
+    </form>
+</div> 

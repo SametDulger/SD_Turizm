@@ -1,0 +1,140 @@
+@model SD_Turizm.Web.Models.DTOs.SaleDto
+
+@{
+    ViewData["Title"] = "Satış Ekle";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-primary rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-shopping-cart fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Satış Ekle</h1>
+                <p class="text-muted mb-0">Yeni bir satış kaydı oluşturun</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-plus me-2"></i>Yeni Satış
+            </h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="SaleNumber" class="form-label">
+                                <i class="fas fa-hashtag me-1"></i>Satış Numarası
+                            </label>
+                            <input asp-for="SaleNumber" class="form-control" required />
+                            <span asp-validation-for="SaleNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="SaleDate" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Satış Tarihi
+                            </label>
+                            <input asp-for="SaleDate" class="form-control" type="date" required />
+                            <span asp-validation-for="SaleDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="CustomerName" class="form-label">
+                                <i class="fas fa-user me-1"></i>Müşteri Adı
+                            </label>
+                            <input asp-for="CustomerName" class="form-control" required />
+                            <span asp-validation-for="CustomerName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="TotalAmount" class="form-label">
+                                <i class="fas fa-money-bill-wave me-1"></i>Toplam Tutar
+                            </label>
+                            <input asp-for="TotalAmount" class="form-control" type="number" step="0.01" required />
+                            <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Currency" class="form-label">
+                                <i class="fas fa-coins me-1"></i>Para Birimi
+                            </label>
+                            <select asp-for="Currency" class="form-select" required>
+                                <option value="">Para Birimi Seçin</option>
+                                <option value="EUR">EUR</option>
+                                <option value="USD">USD</option>
+                                <option value="TRY">TRY</option>
+                            </select>
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label">
+                                <i class="fas fa-info-circle me-1"></i>Durum
+                            </label>
+                            <select asp-for="Status" class="form-select" required>
+                                <option value="">Durum Seçin</option>
+                                <option value="Pending">Beklemede</option>
+                                <option value="Confirmed">Onaylandı</option>
+                                <option value="Cancelled">İptal Edildi</option>
+                                <option value="Completed">Tamamlandı</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Kaydet
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Bootstrap 5 validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+} 

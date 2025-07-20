@@ -1,0 +1,325 @@
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Ürün Raporu";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-warning rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-box fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Ürün Raporu</h1>
+                <p class="text-muted mb-0">Ürün performansını görüntüleyin</p>
+            </div>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary btn-lg me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <i class="fas fa-filter me-2"></i>Filtrele
+            </button>
+            <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Geri Dön
+            </a>
+        </div>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-warning text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-box me-2"></i>Ürün İstatistikleri
+                @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
+                {
+                    <span class="ms-2">(@ViewBag.StartDate.ToString("dd.MM.yyyy") - @ViewBag.EndDate.ToString("dd.MM.yyyy"))</span>
+                }
+            </h6>
+        </div>
+        <div class="card-body">
+            @if (ViewBag.Summary != null)
+            {
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card border-start border-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                            Toplam Ürün
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">@ViewBag.Summary.TotalProducts</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-box fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-start border-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                            Toplam Satış
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">@ViewBag.Summary.TotalSales</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-start border-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                            Toplam Gelir
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalAmount.ToString("N2")</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-start border-danger shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-danger text-uppercase mb-1">
+                                            Toplam Kâr
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalProfit.ToString("N2")</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="m-0 fw-bold text-warning">Ürün Performansı</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" id="productTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Ürün Tipi</th>
+                                            <th>Ürün Adı</th>
+                                            <th>Toplam Satış</th>
+                                            <th>Toplam Gelir</th>
+                                            <th>Toplam Maliyet</th>
+                                            <th>Toplam Kâr</th>
+                                            <th>Ortalama Fiyat</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (ViewBag.Products != null && ViewBag.Products is not JsonElement)
+                                        {
+                                            @foreach (var product in ViewBag.Products)
+                                            {
+                                                <tr>
+                                                    <td>@product.ProductType</td>
+                                                    <td>@product.ProductName</td>
+                                                    <td>@product.TotalSales</td>
+                                                    <td>₺@product.TotalAmount.ToString("N2")</td>
+                                                    <td>₺@((product.TotalAmount - product.TotalProfit).ToString("N2"))</td>
+                                                    <td>₺@product.TotalProfit.ToString("N2")</td>
+                                                    <td>₺@product.AveragePrice.ToString("N2")</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="m-0 fw-bold text-warning">Ürün Tipi Dağılımı</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="productTypeChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="m-0 fw-bold text-warning">En Çok Satan Ürünler</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="topProductsChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtre Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ürün Raporu Filtreleri</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="get">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Başlangıç Tarihi</label>
+                                <input type="date" class="form-control" name="startDate" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Bitiş Tarihi</label>
+                                <input type="date" class="form-control" name="endDate" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Ürün Tipi</label>
+                                <select class="form-select" name="productType">
+                                    <option value="">Tümü</option>
+                                    <option value="Otel">Otel</option>
+                                    <option value="Tur">Tur</option>
+                                    <option value="Transfer">Transfer</option>
+                                    <option value="RentACar">Rent A Car</option>
+                                    <option value="Rehber">Rehber</option>
+                                    <option value="Uçak">Uçak</option>
+                                    <option value="Gemi">Gemi</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Filtrele</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#productTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                },
+                pageLength: 25,
+                order: [[3, 'desc']]
+            });
+
+            @if (ViewBag.Products != null && ViewBag.Products is not JsonElement)
+            {
+                <text>
+                // Ürün tipi dağılımı grafiği
+                const typeCtx = document.getElementById('productTypeChart').getContext('2d');
+                const typeData = {};
+                @foreach (var product in ViewBag.Products)
+                {
+                    <text>
+                    if (!typeData['@product.ProductType']) {
+                        typeData['@product.ProductType'] = 0;
+                    }
+                    typeData['@product.ProductType'] += @product.TotalSales;
+                    </text>
+                }
+
+                const productTypeChart = new Chart(typeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(typeData),
+                        datasets: [{
+                            data: Object.values(typeData),
+                            backgroundColor: [
+                                '#1cc88a',
+                                '#36b9cc',
+                                '#f6c23e',
+                                '#e74a3b',
+                                '#6f42c1',
+                                '#fd7e14',
+                                '#20c9a6'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+
+                // En çok satan ürünler grafiği
+                const topCtx = document.getElementById('topProductsChart').getContext('2d');
+                const allProducts = @Html.Raw(Json.Serialize(ViewBag.Products));
+                const topProducts = allProducts.slice(0, 10);
+                
+                const topProductsChart = new Chart(topCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: topProducts.map(p => p.ProductName),
+                        datasets: [{
+                            label: 'Toplam Satış',
+                            data: topProducts.map(p => p.TotalSales),
+                            backgroundColor: 'rgba(255, 193, 7, 0.8)',
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                </text>
+            }
+        });
+    </script>
+} 
