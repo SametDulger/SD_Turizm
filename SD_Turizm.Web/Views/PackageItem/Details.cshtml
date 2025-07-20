@@ -1,0 +1,51 @@
+@model SD_Turizm.Web.Models.DTOs.PackageItemDto
+
+@{
+    ViewData["Title"] = "Paket Öğesi Detayları";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-info rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-info-circle fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Paket Öğesi Detayları</h1>
+                <p class="text-muted mb-0">Paket öğesi bilgilerini görüntüleyin</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="fas fa-box-open"></i> Paket Öğesi Bilgileri</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-box"></i> Paket</dt>
+                <dd class="col-sm-9 col-md-10">@ViewBag.PackageName</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-tag"></i> Öğe Türü</dt>
+                <dd class="col-sm-9 col-md-10">@Model.ItemType</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-list"></i> Öğe</dt>
+                <dd class="col-sm-9 col-md-10">@ViewBag.ItemName</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-sort-numeric-up"></i> Sıra</dt>
+                <dd class="col-sm-9 col-md-10">@Model.Sequence</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-sticky-note"></i> Notlar</dt>
+                <dd class="col-sm-9 col-md-10">@Model.Notes</dd>
+            </dl>
+            
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><i class="fas fa-edit"></i> Düzenle</a>
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-list"></i> Listeye Dön</a>
+            </div>
+        </div>
+    </div>
+</div> 

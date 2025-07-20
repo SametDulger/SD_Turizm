@@ -1,0 +1,52 @@
+@model SD_Turizm.Web.Models.DTOs.TransferPriceDto
+
+@{
+    ViewData["Title"] = "Transfer Fiyat Sil";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-danger rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-trash fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Transfer Fiyat Sil</h1>
+                <p class="text-muted mb-0">Transfer fiyat kaydını silin</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 fw-bold bg-danger text-white">Bu transfer fiyatını silmek istediğinizden emin misiniz?</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-2">Transfer Şirketi ID</dt>
+                <dd class="col-sm-10">@Model.TransferCompanyId</dd>
+                
+                <dt class="col-sm-2">Fiyat</dt>
+                <dd class="col-sm-10">@Model.Price</dd>
+                
+                <dt class="col-sm-2">Para Birimi</dt>
+                <dd class="col-sm-10">@Model.Currency</dd>
+                
+                <dt class="col-sm-2">Geçerlilik Başlangıcı</dt>
+                <dd class="col-sm-10">@Model.ValidFrom.ToShortDateString()</dd>
+                
+                <dt class="col-sm-2">Geçerlilik Bitişi</dt>
+                <dd class="col-sm-10">@Model.ValidTo.ToShortDateString()</dd>
+            </dl>
+            
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <input type="submit" value="Sil" class="btn btn-danger" />
+                <a asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+            </form>
+        </div>
+    </div>
+</div> 

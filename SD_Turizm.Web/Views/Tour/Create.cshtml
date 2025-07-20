@@ -1,0 +1,144 @@
+@model SD_Turizm.Web.Models.DTOs.TourDto
+
+@{
+    ViewData["Title"] = "Yeni Tur";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-primary rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-map-marked-alt fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Yeni Tur</h1>
+                <p class="text-muted mb-0">Yeni bir tur kaydı oluşturun</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-plus me-2"></i>Yeni Tur
+            </h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Code" class="form-label">
+                                <i class="fas fa-code me-1"></i>Kod
+                            </label>
+                            <input asp-for="Code" class="form-control" required />
+                            <span asp-validation-for="Code" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">
+                                <i class="fas fa-route me-1"></i>Tur Adı
+                            </label>
+                            <input asp-for="Name" class="form-control" required />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="TourOperatorId" class="form-label">
+                                <i class="fas fa-building me-1"></i>Tur Operatörü
+                            </label>
+                            <select asp-for="TourOperatorId" class="form-select" required>
+                                <option value="">Tur Operatörü Seçin</option>
+                            </select>
+                            <span asp-validation-for="TourOperatorId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="StartDate" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Başlangıç Tarihi
+                            </label>
+                            <input asp-for="StartDate" type="date" class="form-control" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="EndDate" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Bitiş Tarihi
+                            </label>
+                            <input asp-for="EndDate" type="date" class="form-control" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    <i class="fas fa-check-circle me-1"></i>Aktif
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Açıklama
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Kaydet
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Bootstrap 5 validation script
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+} 

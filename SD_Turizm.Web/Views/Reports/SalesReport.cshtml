@@ -1,0 +1,265 @@
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Satış Raporu";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-primary rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-chart-line fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Satış Raporu</h1>
+                <p class="text-muted mb-0">Satış istatistiklerini görüntüleyin</p>
+            </div>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary btn-lg me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <i class="fas fa-filter me-2"></i>Filtrele
+            </button>
+            <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Geri Dön
+            </a>
+        </div>
+    </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-calendar me-2"></i>Satış İstatistikleri
+                @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
+                {
+                    <span class="ms-2">(@ViewBag.StartDate.ToString("dd.MM.yyyy") - @ViewBag.EndDate.ToString("dd.MM.yyyy"))</span>
+                }
+            </h6>
+        </div>
+        <div class="card-body">
+            @if (ViewBag.Summary != null)
+            {
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card border-start border-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                                            Toplam Satış
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">@ViewBag.Summary.TotalSales</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-start border-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                                            Toplam Gelir
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalSaleAmount.ToString("N2")</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-start border-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                                            Toplam Maliyet
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalPurchaseAmount.ToString("N2")</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-start border-danger shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs fw-bold text-danger text-uppercase mb-1">
+                                            Toplam Kâr
+                                        </div>
+                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalProfit.ToString("N2")</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="m-0 fw-bold text-primary">Satış Detayları</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" id="salesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>PNR</th>
+                                            <th>Müşteri</th>
+                                            <th>Ürün Tipi</th>
+                                            <th>Ürün Adı</th>
+                                            <th>Satış Fiyatı</th>
+                                            <th>Alış Fiyatı</th>
+                                            <th>Kâr</th>
+                                            <th>Tarih</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (ViewBag.Sales != null)
+                                        {
+                                            @foreach (var sale in ViewBag.Sales)
+                                            {
+                                                <tr>
+                                                    <td>@sale.PnrNumber</td>
+                                                    <td>@sale.CustomerName</td>
+                                                    <td>@sale.SellerType</td>
+                                                    <td>@sale.ProductName</td>
+                                                    <td>₺@sale.SalePrice.ToString("N2")</td>
+                                                    <td>₺@sale.PurchasePrice.ToString("N2")</td>
+                                                    <td>₺@((sale.SalePrice - sale.PurchasePrice).ToString("N2"))</td>
+                                                    <td>@sale.CreatedDate.ToString("dd.MM.yyyy")</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtre Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Rapor Filtreleri</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="get">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Başlangıç Tarihi</label>
+                                <input type="date" class="form-control" name="startDate" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Bitiş Tarihi</label>
+                                <input type="date" class="form-control" name="endDate" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Satıcı Tipi</label>
+                                <select class="form-select" name="sellerType">
+                                    <option value="">Tümü</option>
+                                    <option value="Otel">Otel</option>
+                                    <option value="Tur">Tur</option>
+                                    <option value="Transfer">Transfer</option>
+                                    <option value="RentACar">Rent A Car</option>
+                                    <option value="Rehber">Rehber</option>
+                                    <option value="Uçak">Uçak</option>
+                                    <option value="Gemi">Gemi</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Para Birimi</label>
+                                <select class="form-select" name="currency">
+                                    <option value="">Tümü</option>
+                                    <option value="TRY">TRY</option>
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">PNR Numarası</label>
+                                <input type="text" class="form-control" name="pnrNumber" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Dosya Kodu</label>
+                                <input type="text" class="form-control" name="fileCode" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Acente Kodu</label>
+                                <input type="text" class="form-control" name="agencyCode" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Cari Kodu</label>
+                                <input type="text" class="form-control" name="cariCode" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Filtrele</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#salesTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                },
+                pageLength: 25,
+                order: [[7, 'desc']]
+            });
+        });
+    </script>
+} 

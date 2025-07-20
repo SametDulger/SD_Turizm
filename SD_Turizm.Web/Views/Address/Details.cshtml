@@ -1,0 +1,54 @@
+@model SD_Turizm.Web.Models.DTOs.AddressDto
+
+@{
+    ViewData["Title"] = "Adres Detayları";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-info rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-info-circle fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Adres Detayları</h1>
+                <p class="text-muted mb-0">Adres bilgilerini görüntüleyin</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="fas fa-map-marker-alt"></i> Adres Bilgileri</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-hashtag"></i> ID</dt>
+                <dd class="col-sm-9 col-md-10">@Model.Id</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-road"></i> Sokak</dt>
+                <dd class="col-sm-9 col-md-10">@Model.Street</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-city"></i> Şehir</dt>
+                <dd class="col-sm-9 col-md-10">@Model.City</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-flag"></i> Ülke</dt>
+                <dd class="col-sm-9 col-md-10">@Model.Country</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-mail-bulk"></i> Posta Kodu</dt>
+                <dd class="col-sm-9 col-md-10">@Model.PostalCode</dd>
+                
+                <dt class="col-sm-3 col-md-2"><i class="fas fa-map"></i> Tam Adres</dt>
+                <dd class="col-sm-9 col-md-10">@Model.FullAddress</dd>
+            </dl>
+            
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><i class="fas fa-edit"></i> Düzenle</a>
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-list"></i> Listeye Dön</a>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,296 @@
+@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<div class="container-fluid">
+     <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row g-0 align-items-center">
+                        <div class="col me-2">
+                            <div class="small fw-bold text-primary text-uppercase mb-1">
+                                Toplam Satış</div>
+                            <div class="h5 mb-0 fw-bold text-dark">₺@(ViewBag.Statistics?.TotalSales?.ToString("N0") ?? "0")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row g-0 align-items-center">
+                        <div class="col me-2">
+                            <div class="small fw-bold text-success text-uppercase mb-1">
+                                Aktif Turlar</div>
+                            <div class="h5 mb-0 fw-bold text-dark">@(ViewBag.Statistics?.ActiveTours?.ToString() ?? "0")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-map-marked-alt fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row g-0 align-items-center">
+                        <div class="col me-2">
+                            <div class="small fw-bold text-info text-uppercase mb-1">
+                                Oteller</div>
+                            <div class="h5 mb-0 fw-bold text-dark">@(ViewBag.Statistics?.TotalHotels?.ToString() ?? "0")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hotel fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-start border-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row g-0 align-items-center">
+                        <div class="col me-2">
+                            <div class="small fw-bold text-warning text-uppercase mb-1">
+                                Müşteriler</div>
+                            <div class="h5 mb-0 fw-bold text-dark">@(ViewBag.Statistics?.TotalCustomers?.ToString() ?? "0")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Cards -->
+    <div class="row">
+        <!-- Sales Management -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 fw-bold" style="color: white !important;">
+                        <i class="fas fa-shopping-cart"></i> Satış Yönetimi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="@Url.Action("Index", "Sales")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-list"></i> Satış Listesi
+                        </a>
+                        <a href="@Url.Action("Create", "Sales")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus"></i> Yeni Satış
+                        </a>
+                        <a href="@Url.Action("Index", "SaleItem")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tags"></i> Satış Kalemleri
+                        </a>
+                        <a href="@Url.Action("Index", "SalePerson")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user"></i> Satış Kişileri
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hotel Management -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-success">
+                    <h6 class="m-0 fw-bold" style="color: white !important;">
+                        <i class="fas fa-hotel"></i> Otel Yönetimi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="@Url.Action("Index", "Hotels")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-list"></i> Otel Listesi
+                        </a>
+                        <a href="@Url.Action("Create", "Hotels")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus"></i> Yeni Otel
+                        </a>
+                        <a href="@Url.Action("Index", "HotelPrice")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-dollar-sign"></i> Otel Fiyatları
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tour Management -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-info">
+                    <h6 class="m-0 fw-bold" style="color: white !important;">
+                        <i class="fas fa-map-marked-alt"></i> Tur Yönetimi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="@Url.Action("Index", "TourOperators")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-building"></i> Tur Operatörleri
+                        </a>
+                        <a href="@Url.Action("Index", "Tour")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-route"></i> Turlar
+                        </a>
+                        <a href="@Url.Action("Index", "TourPrice")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-dollar-sign"></i> Tur Fiyatları
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Services -->
+    <div class="row">
+        <!-- Transportation -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 fw-bold" style="color: white !important;">
+                        <i class="fas fa-car"></i> Ulaşım Hizmetleri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="@Url.Action("Index", "TransferCompany")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-bus"></i> Transfer Şirketleri
+                        </a>
+                        <a href="@Url.Action("Index", "TransferPrice")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-dollar-sign"></i> Transfer Fiyatları
+                        </a>
+                        <a href="@Url.Action("Index", "RentACar")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-car"></i> Araç Kiralama
+                        </a>
+                        <a href="@Url.Action("Index", "RentACarPrice")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-dollar-sign"></i> Kiralama Fiyatları
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Services -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-secondary">
+                    <h6 class="m-0 fw-bold" style="color: white !important;">
+                        <i class="fas fa-cogs"></i> Diğer Hizmetler
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="@Url.Action("Index", "Airline")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plane"></i> Havayolları
+                        </a>
+                        <a href="@Url.Action("Index", "AirlinePrice")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-dollar-sign"></i> Uçak Fiyatları
+                        </a>
+                        <a href="@Url.Action("Index", "Cruise")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-ship"></i> Kruvaziyer
+                        </a>
+                        <a href="@Url.Action("Index", "CruisePrice")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-dollar-sign"></i> Kruvaziyer Fiyatları
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support Services -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-dark">
+                    <h6 class="m-0 fw-bold" style="color: white !important;">
+                        <i class="fas fa-headset"></i> Destek Hizmetleri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="@Url.Action("Index", "Guide")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-tie"></i> Rehberler
+                        </a>
+                        <a href="@Url.Action("Index", "GuidePrice")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-dollar-sign"></i> Rehber Fiyatları
+                        </a>
+                        <a href="@Url.Action("Index", "Package")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-box"></i> Paketler
+                        </a>
+                        <a href="@Url.Action("Index", "PackageItem")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-list"></i> Paket Kalemleri
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Management -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-success">
+                    <h6 class="m-0 fw-bold" style="color: white !important;">
+                        <i class="fas fa-cog"></i> Sistem Yönetimi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="@Url.Action("Index", "Address")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-map-marker-alt"></i> Adresler
+                        </a>
+                        <a href="@Url.Action("Index", "ExchangeRate")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-exchange-alt"></i> Döviz Kurları
+                        </a>
+                        <a href="@Url.Action("Index", "CariTransaction")" class="list-group-item list-group-item-action">
+                            <i class="fas fa-book"></i> Cari İşlemler
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-info">
+                    <h6 class="m-0 fw-bold" style="color: white !important;">
+                        <i class="fas fa-chart-line"></i> Raporlar
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-chart-bar"></i> Satış Raporları
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-chart-pie"></i> Gelir Analizi
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-chart-area"></i> Trend Analizi
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Dashboard için ek JavaScript kodları buraya eklenebilir
+        $(document).ready(function() {
+            console.log('SD Turizm Dashboard yüklendi');
+        });
+    </script>
+}
