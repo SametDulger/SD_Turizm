@@ -18,7 +18,7 @@ namespace SD_Turizm.Core.Entities
         public string Description { get; set; } = string.Empty;
         
         public int? VendorId { get; set; }
-        public string VendorType { get; set; } = string.Empty;
+        public string? VendorType { get; set; }
         
         public decimal UnitPrice { get; set; }
         public decimal TotalPrice { get; set; }
@@ -29,7 +29,7 @@ namespace SD_Turizm.Core.Entities
         
         // Web view'lar için ek property'ler
         [MaxLength(50)]
-        public string ItemType { get; set; } = string.Empty;
+        public string? ItemType { get; set; }
         
         public int ItemId { get; set; }
         

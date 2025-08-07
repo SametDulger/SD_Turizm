@@ -162,15 +162,16 @@ namespace SD_Turizm.Application.Services
         public async Task<object> GetProductSummaryAsync(DateTime startDate, DateTime endDate, string? productType = null)
         {
             var products = await GetProductReportAsync(startDate, endDate, productType);
+            var productList = products.Cast<dynamic>().ToList();
 
             var summary = new
             {
-                TotalProducts = products.Count(),
-                TotalSales = products.Count(),
-                TotalRevenue = 0m,
-                TotalCost = 0m,
-                TotalProfit = 0m,
-                TopProducts = products.Take(10).ToList()
+                TotalProducts = productList.Count,
+                TotalSales = productList.Sum(p => (int)p.TotalSales),
+                TotalRevenue = productList.Sum(p => (decimal)p.TotalRevenue),
+                TotalCost = productList.Sum(p => (decimal)p.TotalCost),
+                TotalProfit = productList.Sum(p => (decimal)p.TotalProfit),
+                TopProducts = productList.Take(10).ToList()
             };
 
             return summary;

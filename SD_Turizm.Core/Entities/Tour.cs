@@ -22,8 +22,7 @@ namespace SD_Turizm.Core.Entities
         
         public int TourOperatorId { get; set; }
         public virtual TourOperator TourOperator { get; set; } = null!;
-        
-        public virtual ICollection<TourPrice> Prices { get; set; }
+        public virtual ICollection<TourPrice> TourPrices { get; set; } = new HashSet<TourPrice>();
         
         // Web view'lar için ek property'ler
         [MaxLength(1000)]
@@ -31,10 +30,5 @@ namespace SD_Turizm.Core.Entities
         
         [MaxLength(100)]
         public string Duration { get; set; } = string.Empty;
-        
-        public Tour()
-        {
-            Prices = new HashSet<TourPrice>();
-        }
     }
 } 

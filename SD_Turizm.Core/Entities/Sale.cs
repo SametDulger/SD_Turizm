@@ -7,11 +7,11 @@ namespace SD_Turizm.Core.Entities
     {
         [Required]
         [MaxLength(20)]
-        public string PNRNumber { get; set; }
+        public string PNRNumber { get; set; } = string.Empty;
         
         [Required]
         [MaxLength(50)]
-        public string CariCode { get; set; }
+        public string CariCode { get; set; } = string.Empty;
         
         // Web view'lar için property'ler
         public string SaleNumber => PNRNumber;
@@ -20,10 +20,10 @@ namespace SD_Turizm.Core.Entities
         public string Status { get; set; } = "Pending";
         
         [MaxLength(50)]
-        public string AgencyCode { get; set; }
+        public string? AgencyCode { get; set; }
         
         [MaxLength(50)]
-        public string PackageCode { get; set; }
+        public string? PackageCode { get; set; }
         
         public bool IsPackageSale { get; set; }
         
@@ -34,27 +34,30 @@ namespace SD_Turizm.Core.Entities
         public string Currency { get; set; } = "EUR";
         
         [MaxLength(50)]
-        public string SellerType { get; set; } = string.Empty;
+        public string? SellerType { get; set; }
         
         [MaxLength(50)]
-        public string FileCode { get; set; } = string.Empty;
+        public string? FileCode { get; set; }
         
         public decimal SalePrice { get; set; }
         
         public decimal PurchasePrice { get; set; }
         
         [MaxLength(100)]
-        public string ProductName { get; set; } = string.Empty;
+        public string? ProductName { get; set; }
         
         public decimal TotalAmountTL { get; set; }
         
-        public virtual ICollection<SaleItem> Items { get; set; }
-        public virtual ICollection<SalePerson> Persons { get; set; }
+        public int AddressId { get; set; }
+        
+        public virtual ICollection<SaleItem> SaleItems { get; set; }
+        public virtual ICollection<SalePerson> SalePersons { get; set; }
+        public virtual Address Address { get; set; } = null!;
         
         public Sale()
         {
-            Items = new HashSet<SaleItem>();
-            Persons = new HashSet<SalePerson>();
+            SaleItems = new HashSet<SaleItem>();
+            SalePersons = new HashSet<SalePerson>();
         }
     }
 } 

@@ -23,12 +23,12 @@ namespace SD_Turizm.Core.Entities
         public int Age { get; set; }
         
         [MaxLength(50)]
-        public string Nationality { get; set; } = string.Empty;
+        public string? Nationality { get; set; }
         
         // Web view'lar için ek property'ler
         public DateTime? BirthDate { get; set; }
         
         [MaxLength(50)]
-        public string PassportNumber { get; set; } = string.Empty;
+        public string? PassportNumber { get; set; }
     }
 } 

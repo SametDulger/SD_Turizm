@@ -7,8 +7,8 @@ namespace SD_Turizm.Application.Services
     public interface ITourOperatorService
     {
         Task<IEnumerable<TourOperator>> GetAllTourOperatorsAsync();
-        Task<TourOperator> GetTourOperatorByIdAsync(int id);
-        Task<TourOperator> GetTourOperatorByCodeAsync(string code);
+        Task<TourOperator?> GetTourOperatorByIdAsync(int id);
+        Task<TourOperator?> GetTourOperatorByCodeAsync(string code);
         Task<TourOperator> CreateTourOperatorAsync(TourOperator tourOperator);
         Task UpdateTourOperatorAsync(TourOperator tourOperator);
         Task DeleteTourOperatorAsync(int id);

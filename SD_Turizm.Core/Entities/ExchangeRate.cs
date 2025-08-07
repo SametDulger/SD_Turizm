@@ -9,11 +9,11 @@ namespace SD_Turizm.Core.Entities
         
         [Required]
         [MaxLength(3)]
-        public string FromCurrency { get; set; }
+        public string FromCurrency { get; set; } = string.Empty;
         
         [Required]
         [MaxLength(3)]
-        public string ToCurrency { get; set; }
+        public string ToCurrency { get; set; } = string.Empty;
         
         // Web view'lar için property'ler
         public string SourceCurrency => FromCurrency;

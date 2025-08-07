@@ -7,10 +7,10 @@ namespace SD_Turizm.Core.Entities
     public class Airline : Vendor
     {
         [MaxLength(200)]
-        public string AircraftTypes { get; set; }
+        public string AircraftTypes { get; set; } = string.Empty;
         
         [MaxLength(200)]
-        public string FlightRegions { get; set; }
+        public string FlightRegions { get; set; } = string.Empty;
         
         public virtual ICollection<AirlinePrice> Prices { get; set; }
         

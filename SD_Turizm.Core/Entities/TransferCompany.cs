@@ -7,13 +7,13 @@ namespace SD_Turizm.Core.Entities
     public class TransferCompany : Vendor
     {
         [MaxLength(200)]
-        public string Routes { get; set; } // Transfer güzergahları
+        public string Routes { get; set; } = string.Empty; // Transfer güzergahları
         
         [MaxLength(100)]
-        public string VehicleType { get; set; }
+        public string VehicleType { get; set; } = string.Empty;
         
         [MaxLength(200)]
-        public string Region { get; set; }
+        public string Region { get; set; } = string.Empty;
         
         [MaxLength(500)]
         public string Description { get; set; } = string.Empty;
