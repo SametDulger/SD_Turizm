@@ -20,12 +20,12 @@ namespace SD_Turizm.Application.Services
             return await _unitOfWork.Repository<TourOperator>().GetAllAsync();
         }
 
-        public async Task<TourOperator> GetTourOperatorByIdAsync(int id)
+        public async Task<TourOperator?> GetTourOperatorByIdAsync(int id)
         {
             return await _unitOfWork.Repository<TourOperator>().GetByIdAsync(id);
         }
 
-        public async Task<TourOperator> GetTourOperatorByCodeAsync(string code)
+        public async Task<TourOperator?> GetTourOperatorByCodeAsync(string code)
         {
             var tourOperators = await _unitOfWork.Repository<TourOperator>().FindAsync(to => to.Code == code);
             return tourOperators.FirstOrDefault();

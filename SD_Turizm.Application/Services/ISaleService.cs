@@ -8,8 +8,8 @@ namespace SD_Turizm.Application.Services
     public interface ISaleService
     {
         Task<IEnumerable<Sale>> GetAllSalesAsync();
-        Task<Sale> GetSaleByIdAsync(int id);
-        Task<Sale> GetSaleByPNRAsync(string pnrNumber);
+        Task<Sale?> GetSaleByIdAsync(int id);
+        Task<Sale?> GetSaleByPNRAsync(string pnrNumber);
         Task<Sale> CreateSaleAsync(Sale sale);
         Task UpdateSaleAsync(Sale sale);
         Task DeleteSaleAsync(int id);

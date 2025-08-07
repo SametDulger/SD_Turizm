@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SD_Turizm.Core.Entities
 {
@@ -25,5 +26,16 @@ namespace SD_Turizm.Core.Entities
         public string ItemType { get; set; } = string.Empty;
         
         public int ItemId { get; set; }
+        
+        public int Quantity { get; set; } = 1;
+        
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal UnitPrice { get; set; }
+        
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalPrice { get; set; }
+        
+        [MaxLength(3)]
+        public string Currency { get; set; } = "EUR";
     }
 } 

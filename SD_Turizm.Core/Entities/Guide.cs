@@ -7,7 +7,7 @@ namespace SD_Turizm.Core.Entities
     public class Guide : Vendor
     {
         [MaxLength(200)]
-        public string Languages { get; set; }
+        public string Languages { get; set; } = string.Empty;
         
         public virtual ICollection<GuidePrice> Prices { get; set; }
         

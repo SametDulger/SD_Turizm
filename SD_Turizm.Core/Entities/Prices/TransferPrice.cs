@@ -5,11 +5,12 @@ namespace SD_Turizm.Core.Entities.Prices
     public class TransferPrice : BasePrice
     {
         public int TransferCompanyId { get; set; }
-        public int TransferId { get; set; }
         public virtual TransferCompany TransferCompany { get; set; } = null!;
         
+        public int TransferId { get; set; }
+        
         [Required]
-        [MaxLength(100)]
-        public string Route { get; set; } = string.Empty; // IST-AYT gibi
+        [MaxLength(200)]
+        public string Route { get; set; } = string.Empty;
     }
 } 

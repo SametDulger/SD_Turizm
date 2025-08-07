@@ -7,7 +7,7 @@ namespace SD_Turizm.Core.Entities
     public class RentACar : Vendor
     {
         [MaxLength(500)]
-        public string AvailableCars { get; set; }
+        public string AvailableCars { get; set; } = string.Empty;
         
         public virtual ICollection<RentACarPrice> Prices { get; set; }
         

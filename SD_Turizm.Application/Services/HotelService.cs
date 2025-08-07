@@ -20,12 +20,12 @@ namespace SD_Turizm.Application.Services
             return await _unitOfWork.Repository<Hotel>().GetAllAsync();
         }
 
-        public async Task<Hotel> GetHotelByIdAsync(int id)
+        public async Task<Hotel?> GetHotelByIdAsync(int id)
         {
             return await _unitOfWork.Repository<Hotel>().GetByIdAsync(id);
         }
 
-        public async Task<Hotel> GetHotelByCodeAsync(string code)
+        public async Task<Hotel?> GetHotelByCodeAsync(string code)
         {
             var hotels = await _unitOfWork.Repository<Hotel>().FindAsync(h => h.Code == code);
             return hotels.FirstOrDefault();
