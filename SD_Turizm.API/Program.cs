@@ -1,8 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using SD_Turizm.Application.Services;
 using SD_Turizm.Core.Interfaces;
 using SD_Turizm.Infrastructure.Data;
 using SD_Turizm.Infrastructure.Repositories;
+using SD_Turizm.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +54,33 @@ builder.Services.AddScoped<ITourService, TourService>();
 builder.Services.AddScoped<ISaleItemService, SaleItemService>();
 builder.Services.AddScoped<ISalePersonService, SalePersonService>();
 
+// Add Authentication Service
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Add Cache Service
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ICacheService, CacheService>();
+
+// Add JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "DefaultKey"))
+        };
+    });
+
+// Add Authorization
+builder.Services.AddAuthorization();
+
 // Add CORS
 builder.Services.AddCors(options =>
 {
@@ -72,8 +103,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Add Global Exception Handler
+app.UseMiddleware<GlobalExceptionHandler>();
+
+// Add Validation Middleware
+app.UseMiddleware<ValidationMiddleware>();
+
 app.UseCors("AllowAll");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

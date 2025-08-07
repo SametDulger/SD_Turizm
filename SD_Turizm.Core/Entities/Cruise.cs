@@ -7,10 +7,10 @@ namespace SD_Turizm.Core.Entities
     public class Cruise : Vendor
     {
         [MaxLength(100)]
-        public string RoomLocations { get; set; } // DNZ, GNL, PRK
+        public string RoomLocations { get; set; } = string.Empty; // DNZ, GNL, PRK
         
         [MaxLength(100)]
-        public string RoomTypes { get; set; } // SGL, DBL, TRP, DBL+1, TRP+1
+        public string RoomTypes { get; set; } = string.Empty; // SGL, DBL, TRP, DBL+1, TRP+1
         
         [MaxLength(500)]
         public string Description { get; set; } = string.Empty;

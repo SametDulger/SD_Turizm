@@ -12,7 +12,7 @@ namespace SD_Turizm.Infrastructure.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
-        private IDbContextTransaction _transaction;
+        private IDbContextTransaction? _transaction;
         private readonly Dictionary<Type, object> _repositories;
 
         public UnitOfWork(ApplicationDbContext context)
@@ -29,7 +29,10 @@ namespace SD_Turizm.Infrastructure.Repositories
             {
                 var repositoryType = typeof(GenericRepository<>).MakeGenericType(type);
                 var repository = Activator.CreateInstance(repositoryType, _context);
-                _repositories[type] = repository;
+                if (repository != null)
+                {
+                    _repositories[type] = repository;
+                }
             }
 
             return (IGenericRepository<T>)_repositories[type];
@@ -49,11 +52,17 @@ namespace SD_Turizm.Infrastructure.Repositories
         {
             try
             {
-                await _transaction?.CommitAsync();
+                if (_transaction != null)
+                {
+                    await _transaction.CommitAsync();
+                }
             }
             catch
             {
-                await _transaction?.RollbackAsync();
+                if (_transaction != null)
+                {
+                    await _transaction.RollbackAsync();
+                }
                 throw;
             }
             finally
@@ -66,7 +75,10 @@ namespace SD_Turizm.Infrastructure.Repositories
         {
             try
             {
-                await _transaction?.RollbackAsync();
+                if (_transaction != null)
+                {
+                    await _transaction.RollbackAsync();
+                }
             }
             finally
             {

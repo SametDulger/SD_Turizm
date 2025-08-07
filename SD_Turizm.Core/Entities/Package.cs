@@ -7,14 +7,14 @@ namespace SD_Turizm.Core.Entities
     {
         [Required]
         [MaxLength(50)]
-        public string Code { get; set; }
+        public string Code { get; set; } = string.Empty;
         
         [Required]
         [MaxLength(200)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         
         [MaxLength(500)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
         
         public decimal PackagePrice { get; set; }
         
@@ -22,11 +22,11 @@ namespace SD_Turizm.Core.Entities
         [MaxLength(3)]
         public string Currency { get; set; } = "EUR";
         
-        public virtual ICollection<PackageItem> Items { get; set; }
+        public virtual ICollection<PackageItem> PackageItems { get; set; }
         
         public Package()
         {
-            Items = new HashSet<PackageItem>();
+            PackageItems = new HashSet<PackageItem>();
         }
     }
 } 

@@ -7,7 +7,7 @@ namespace SD_Turizm.Core.Entities
     {
         [Required]
         [MaxLength(50)]
-        public string CariCode { get; set; }
+        public string CariCode { get; set; } = string.Empty;
         
         [Required]
         [MaxLength(100)]
@@ -17,7 +17,7 @@ namespace SD_Turizm.Core.Entities
         
         [Required]
         [MaxLength(10)]
-        public string TransactionType { get; set; } // BORC, ALACAK
+        public string TransactionType { get; set; } = string.Empty; // BORC, ALACAK
         
         public decimal Amount { get; set; }
         
@@ -28,12 +28,12 @@ namespace SD_Turizm.Core.Entities
         public decimal AmountTL { get; set; }
         
         [MaxLength(200)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
         
         [MaxLength(20)]
-        public string PNRNumber { get; set; }
+        public string? PNRNumber { get; set; }
         
         public int? SaleId { get; set; }
-        public virtual Sale Sale { get; set; }
+        public virtual Sale? Sale { get; set; }
     }
 } 

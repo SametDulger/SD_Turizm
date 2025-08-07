@@ -21,12 +21,12 @@ namespace SD_Turizm.Application.Services
             return await _unitOfWork.Repository<Sale>().GetAllAsync();
         }
 
-        public async Task<Sale> GetSaleByIdAsync(int id)
+        public async Task<Sale?> GetSaleByIdAsync(int id)
         {
             return await _unitOfWork.Repository<Sale>().GetByIdAsync(id);
         }
 
-        public async Task<Sale> GetSaleByPNRAsync(string pnrNumber)
+        public async Task<Sale?> GetSaleByPNRAsync(string pnrNumber)
         {
             var sales = await _unitOfWork.Repository<Sale>().FindAsync(s => s.PNRNumber == pnrNumber);
             return sales.FirstOrDefault();
