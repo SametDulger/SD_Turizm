@@ -20,7 +20,7 @@ namespace SD_Turizm.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var entities = await _tourOperatorApiService.GetAllTourOperatorsAsync() ?? new List<TourOperatorDto>();
-            await LoadLookupData();
+            LoadLookupData();
             return View(entities);
         }
 
@@ -109,7 +109,7 @@ namespace SD_Turizm.Web.Controllers
             return View();
         }
 
-        private async Task LoadLookupData()
+        private void LoadLookupData()
         {
             // Basic lookup data if needed for tour operator forms
         }

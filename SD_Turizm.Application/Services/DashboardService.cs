@@ -152,10 +152,6 @@ namespace SD_Turizm.Application.Services
             }
             catch (Exception ex)
             {
-                // Hata mesajını log'a yazdır
-                Console.WriteLine($"Dashboard Statistics Error: {ex.Message}");
-                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-                
                 // Hata durumunda varsayılan değerler
                 return await Task.FromResult(new
                 {

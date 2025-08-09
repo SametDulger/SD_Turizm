@@ -7,7 +7,7 @@ namespace SD_Turizm.Web.Services
         Task<CustomerReportDto?> GetCustomerReportAsync();
         Task<FinancialReportDto?> GetFinancialReportAsync();
         Task<SalesReportDto?> GetSalesReportAsync();
-        Task<ProductReportDto?> GetProductReportAsync();
+        Task<dynamic?> GetProductReportDataAsync();
         Task<HttpResponseMessage?> ExportCustomerReportAsync(string format = "pdf");
         Task<HttpResponseMessage?> ExportFinancialReportAsync(string format = "pdf");
         Task<HttpResponseMessage?> ExportSalesReportAsync(string format = "pdf");

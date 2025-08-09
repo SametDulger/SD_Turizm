@@ -22,7 +22,7 @@ namespace SD_Turizm.Web.Controllers
             try
             {
                 var roles = await _roleApiService.GetAllRolesAsync() ?? new List<RoleDto>();
-                await LoadLookupData();
+                LoadLookupData();
                 return View(roles);
             }
             catch (Exception ex)
@@ -172,7 +172,7 @@ namespace SD_Turizm.Web.Controllers
             return NotFound();
         }
 
-        private async Task LoadLookupData()
+        private void LoadLookupData()
         {
             // Basic lookup data if needed for role forms
         }

@@ -103,35 +103,45 @@ namespace SD_Turizm.Application.Services
             return summary;
         }
 
-        public async Task<IEnumerable<Sale>> GetCustomerReportAsync(DateTime startDate, DateTime endDate, string? cariCode = null)
+        public async Task<IEnumerable<object>> GetCustomerReportAsync(DateTime startDate, DateTime endDate, string? cariCode = null)
         {
             var sales = await _unitOfWork.Repository<Sale>().FindAsync(s =>
                 s.CreatedDate >= startDate && s.CreatedDate <= endDate &&
                 (string.IsNullOrEmpty(cariCode) || s.CariCode == cariCode));
 
-            return sales.OrderByDescending(s => s.CreatedDate);
+            var customerReport = sales.GroupBy(s => new { s.CariCode, s.CustomerName })
+                .Select(g => new
+                {
+                    CariCode = g.Key.CariCode,
+                    CustomerName = g.Key.CustomerName,
+                    TotalOrders = g.Count(),
+                    TotalPurchases = g.Sum(s => s.SalePrice),
+                    TotalProfit = g.Sum(s => s.SalePrice - s.PurchasePrice),
+                    AverageOrderValue = g.Average(s => s.SalePrice),
+                    FirstPurchaseDate = g.Min(s => s.CreatedDate),
+                    LastPurchaseDate = g.Max(s => s.CreatedDate),
+                    ProductName = g.First().ProductName,
+                    SellerType = g.First().SellerType
+                })
+                .OrderByDescending(x => x.TotalPurchases)
+                .ToList();
+
+            return customerReport.Cast<object>();
         }
 
         public async Task<object> GetCustomerSummaryAsync(DateTime startDate, DateTime endDate, string? cariCode = null)
         {
-            var sales = await GetCustomerReportAsync(startDate, endDate, cariCode);
+            var customers = await GetCustomerReportAsync(startDate, endDate, cariCode);
+            var customerList = customers.Cast<dynamic>().ToList();
 
             var summary = new
             {
-                TotalCustomers = sales.Select(s => s.CariCode).Distinct().Count(),
-                TotalSales = sales.Count(),
-                TotalRevenue = sales.Sum(s => s.SalePrice),
-                CustomerRankings = sales.GroupBy(s => s.CariCode)
-                    .Select(g => new
-                    {
-                        CariCode = g.Key,
-                        CustomerName = g.First().CustomerName,
-                        TotalPurchases = g.Count(),
-                        TotalSpent = g.Sum(s => s.SalePrice),
-                        AveragePurchase = g.Average(s => s.SalePrice)
-                    })
-                    .OrderByDescending(x => x.TotalSpent)
-                    .ToList()
+                TotalCustomers = customerList.Count,
+                ActiveCustomers = customerList.Count,
+                TotalRevenue = customerList.Sum(c => (decimal)(c.TotalPurchases ?? 0)),
+                AverageOrderValue = customerList.Any() ? customerList.Average(c => (decimal)(c.AverageOrderValue ?? 0)) : 0,
+                RepeatCustomerRate = customerList.Count > 0 ? customerList.Count(c => (int)(c.TotalOrders ?? 0) > 1) / (double)customerList.Count * 100 : 0,
+                CustomerRankings = customerList.OrderByDescending(c => (decimal)(c.TotalPurchases ?? 0)).Take(10).ToList()
             };
 
             return summary;
@@ -181,7 +191,7 @@ namespace SD_Turizm.Application.Services
         // V2 Methods
         public async Task<PagedResult<object>> GetSalesReportWithPaginationAsync(PaginationDto pagination, DateTime? startDate = null, DateTime? endDate = null, string? sellerType = null, string? currency = null, string? pnrNumber = null, string? fileCode = null, string? agencyCode = null, string? cariCode = null)
         {
-            var sales = await GetSalesReportAsync(startDate ?? DateTime.MinValue, endDate ?? DateTime.MaxValue, sellerType, currency, pnrNumber, fileCode, agencyCode, cariCode);
+            var sales = await GetSalesReportAsync(startDate ?? new DateTime(2025, 1, 1), endDate ?? new DateTime(2025, 12, 31), sellerType, currency, pnrNumber, fileCode, agencyCode, cariCode);
             var salesList = sales.ToList();
 
             var totalCount = salesList.Count;
@@ -205,7 +215,7 @@ namespace SD_Turizm.Application.Services
 
         public async Task<PagedResult<object>> GetFinancialReportWithPaginationAsync(PaginationDto pagination, DateTime? startDate = null, DateTime? endDate = null, string currency = "TRY")
         {
-            var sales = await GetFinancialReportAsync(startDate ?? DateTime.MinValue, endDate ?? DateTime.MaxValue, currency);
+            var sales = await GetFinancialReportAsync(startDate ?? new DateTime(2025, 1, 1), endDate ?? new DateTime(2025, 12, 31), currency);
             var salesList = sales.ToList();
 
             var totalCount = salesList.Count;
@@ -229,11 +239,11 @@ namespace SD_Turizm.Application.Services
 
         public async Task<PagedResult<object>> GetCustomerReportWithPaginationAsync(PaginationDto pagination, DateTime? startDate = null, DateTime? endDate = null, string? cariCode = null)
         {
-            var sales = await GetCustomerReportAsync(startDate ?? DateTime.MinValue, endDate ?? DateTime.MaxValue, cariCode);
-            var salesList = sales.ToList();
+            var customers = await GetCustomerReportAsync(startDate ?? new DateTime(2025, 1, 1), endDate ?? new DateTime(2025, 12, 31), cariCode);
+            var customerList = customers.ToList();
 
-            var totalCount = salesList.Count;
-            var items = salesList.Skip((pagination.Page - 1) * pagination.PageSize).Take(pagination.PageSize).Cast<object>().ToList();
+            var totalCount = customerList.Count;
+            var items = customerList.Skip((pagination.Page - 1) * pagination.PageSize).Take(pagination.PageSize).ToList();
 
             return new PagedResult<object>
             {
@@ -247,7 +257,7 @@ namespace SD_Turizm.Application.Services
 
         public async Task<PagedResult<object>> GetProductReportWithPaginationAsync(PaginationDto pagination, DateTime? startDate = null, DateTime? endDate = null, string? productType = null)
         {
-            var products = await GetProductReportAsync(startDate ?? DateTime.MinValue, endDate ?? DateTime.MaxValue, productType);
+            var products = await GetProductReportAsync(startDate ?? new DateTime(2025, 1, 1), endDate ?? new DateTime(2025, 12, 31), productType);
             var productList = products.ToList();
 
             var totalCount = productList.Count;
@@ -287,7 +297,7 @@ namespace SD_Turizm.Application.Services
 
         public async Task<object> GetSummaryAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
-            var sales = await GetSalesReportAsync(startDate ?? DateTime.MinValue, endDate ?? DateTime.MaxValue);
+            var sales = await GetSalesReportAsync(startDate ?? new DateTime(2025, 1, 1), endDate ?? new DateTime(2025, 12, 31));
             var salesList = sales.ToList();
 
             return new

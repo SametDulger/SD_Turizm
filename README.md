@@ -30,7 +30,7 @@
 - ✅ **Tur Operasyonları** - Tur planları, operatör yönetimi
 - ✅ **Satış Yönetimi** - PNR, paket satışları, müşteri takibi
 - ✅ **Mali İşlemler** - Cari hesaplar, döviz kurları
-- ✅ **Raporlama** - Finansal ve operasyonel raporlar
+- ✅ **Raporlama** - Satış, finansal, müşteri ve ürün raporları
 - ✅ **Kullanıcı Yönetimi** - Rol tabanlı yetkilendirme
 
 ### 🛠️ Teknik Özellikler
@@ -48,6 +48,7 @@
 - ✅ **Response Compression** - Gzip compression
 - ✅ **Database Migrations** - EF Core migrations
 - ✅ **Seed Data** - Demo veriler ile hızlı başlangıç
+- ✅ **Dashboard & Reports** - Kapsamlı raporlama sistemi
 
 ## 🗄️ Veritabanı
 

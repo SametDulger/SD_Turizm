@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SD_Turizm.Application.Services;
 using SD_Turizm.Core.Entities;
@@ -9,6 +10,7 @@ namespace SD_Turizm.API.Controllers.V1
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [Authorize]
     public class TourOperatorsController : ControllerBase
     {
         private readonly ITourOperatorService _tourOperatorService;
