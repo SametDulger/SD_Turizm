@@ -1,5 +1,7 @@
 using System.Net;
 using System.Text.Json;
+using SD_Turizm.Core.Exceptions;
+using FluentValidation;
 
 namespace SD_Turizm.API.Middleware
 {
@@ -53,6 +55,8 @@ namespace SD_Turizm.API.Middleware
         {
             return exception switch
             {
+                BusinessException businessEx => businessEx.Message,
+                FluentValidation.ValidationException validationEx => "Doğrulama hatası: " + string.Join(", ", validationEx.Errors.Select(e => e.ErrorMessage)),
                 UnauthorizedAccessException => "Yetkisiz erişim. Lütfen giriş yapın.",
                 InvalidOperationException => "Geçersiz işlem. Lütfen verilerinizi kontrol edin.",
                 ArgumentException => "Geçersiz parametre. Lütfen girdiğiniz bilgileri kontrol edin.",
@@ -65,6 +69,8 @@ namespace SD_Turizm.API.Middleware
         {
             return exception switch
             {
+                BusinessException businessEx => businessEx.ErrorCode,
+                FluentValidation.ValidationException => "VALIDATION_ERROR",
                 UnauthorizedAccessException => "UNAUTHORIZED",
                 InvalidOperationException => "INVALID_OPERATION",
                 ArgumentException => "INVALID_ARGUMENT",
@@ -77,6 +83,8 @@ namespace SD_Turizm.API.Middleware
         {
             return exception switch
             {
+                BusinessException businessEx => businessEx.StatusCode,
+                FluentValidation.ValidationException => (int)HttpStatusCode.BadRequest,
                 UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
                 InvalidOperationException => (int)HttpStatusCode.BadRequest,
                 ArgumentException => (int)HttpStatusCode.BadRequest,

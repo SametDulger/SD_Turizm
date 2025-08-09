@@ -7,7 +7,7 @@ namespace SD_Turizm.Application.Services
     public interface IAirlineService
     {
         Task<IEnumerable<Airline>> GetAllAsync();
-        Task<Airline> GetByIdAsync(int id);
+        Task<Airline?> GetByIdAsync(int id);
         Task<Airline> CreateAsync(Airline entity);
         Task UpdateAsync(Airline entity);
         Task DeleteAsync(int id);

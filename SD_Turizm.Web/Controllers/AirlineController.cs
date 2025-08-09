@@ -1,38 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SD_Turizm.Web.Models.DTOs;
-using System.Text;
-using System.Text.Json;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class AirlineController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly IAirlineApiService _airlineApiService;
+        private readonly ILookupApiService _lookupApiService;
 
-        public AirlineController(HttpClient httpClient, IConfiguration configuration)
+        public AirlineController(IAirlineApiService airlineApiService, ILookupApiService lookupApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _airlineApiService = airlineApiService;
+            _lookupApiService = lookupApiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Airline");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entities = JsonSerializer.Deserialize<List<AirlineDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entities);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return View(new List<AirlineDto>());
+            var entities = await _airlineApiService.GetAllAirlinesAsync();
+            await LoadLookupData();
+            return View(entities);
         }
 
         public IActionResult Create()
@@ -46,122 +35,83 @@ namespace SD_Turizm.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                var result = await _airlineApiService.CreateAirlineAsync(entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync($"{_apiBaseUrl}Airline", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Havayolu oluşturulurken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            try
+            var entity = await _airlineApiService.GetAirlineByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Airline/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<AirlineDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            try
+            var entity = await _airlineApiService.GetAirlineByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Airline/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<AirlineDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, AirlineDto entity)
         {
+            if (id != entity.Id)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                try
+                var result = await _airlineApiService.UpdateAirlineAsync(id, entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PutAsync($"{_apiBaseUrl}Airline/{id}", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Havayolu güncellenirken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var entity = await _airlineApiService.GetAirlineByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Airline/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<AirlineDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
+            var result = await _airlineApiService.DeleteAirlineAsync(id);
+            if (result)
             {
-                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}Airline/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError("", "Havayolu silinirken hata oluştu.");
+            return View();
+        }
+
+        private async Task LoadLookupData()
+        {
+            // Basic lookup data if needed for airline forms
         }
     }
-} 
+}

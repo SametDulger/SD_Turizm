@@ -4,59 +4,97 @@ namespace SD_Turizm.Core.DTOs
 {
     public class LoginDto
     {
-        [Required(ErrorMessage = "Kullanıcı adı zorunludur")]
+        [Required]
         public string Username { get; set; } = string.Empty;
-        
-        [Required(ErrorMessage = "Şifre zorunludur")]
+
+        [Required]
         public string Password { get; set; } = string.Empty;
     }
-    
-    public class RegisterDto
+
+    public class LoginRequestDto
     {
-        [Required(ErrorMessage = "Kullanıcı adı zorunludur")]
-        [StringLength(100, MinimumLength = 3, ErrorMessage = "Kullanıcı adı 3-100 karakter arasında olmalıdır")]
+        [Required]
         public string Username { get; set; } = string.Empty;
-        
-        [Required(ErrorMessage = "Email zorunludur")]
-        [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
-        public string Email { get; set; } = string.Empty;
-        
-        [Required(ErrorMessage = "Şifre zorunludur")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Şifre en az 6 karakter olmalıdır")]
+
+        [Required]
         public string Password { get; set; } = string.Empty;
-        
-        [Required(ErrorMessage = "Ad zorunludur")]
-        public string FirstName { get; set; } = string.Empty;
-        
-        [Required(ErrorMessage = "Soyad zorunludur")]
-        public string LastName { get; set; } = string.Empty;
-        
-        public string? PhoneNumber { get; set; }
     }
-    
-    public class AuthResponseDto
+
+    public class LoginResponseDto
     {
         public string Token { get; set; } = string.Empty;
         public string RefreshToken { get; set; } = string.Empty;
         public DateTime ExpiresAt { get; set; }
-        public UserDto User { get; set; } = null!;
+        public string Username { get; set; } = string.Empty;
+        public List<string> Roles { get; set; } = new List<string>();
     }
-    
+
+    public class RegisterRequestDto
+    {
+        [Required]
+        public string Username { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class RegisterResponseDto
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+    }
+
+    public class RefreshTokenRequestDto
+    {
+        [Required]
+        public string RefreshToken { get; set; } = string.Empty;
+    }
+
+    public class TwoFactorRequestDto
+    {
+        [Required]
+        public string Code { get; set; } = string.Empty;
+    }
+
+    public class AssignRoleRequestDto
+    {
+        [Required]
+        public int UserId { get; set; }
+
+        [Required]
+        public int RoleId { get; set; }
+    }
+
+    public class ChangePasswordRequestDto
+    {
+        [Required]
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required]
+        [MinLength(6)]
+        public string NewPassword { get; set; } = string.Empty;
+    }
+
+    public class ForgotPasswordRequestDto
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+    }
+
     public class UserDto
     {
         public int Id { get; set; }
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string? PhoneNumber { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
         public List<string> Roles { get; set; } = new List<string>();
-        public List<string> Permissions { get; set; } = new List<string>();
-    }
-    
-    public class RefreshTokenDto
-    {
-        [Required]
-        public string RefreshToken { get; set; } = string.Empty;
     }
 } 

@@ -209,13 +209,13 @@
                                 <label class="form-label">Ürün Tipi</label>
                                 <select class="form-select" name="productType">
                                     <option value="">Tümü</option>
-                                    <option value="Otel">Otel</option>
-                                    <option value="Tur">Tur</option>
-                                    <option value="Transfer">Transfer</option>
-                                    <option value="RentACar">Rent A Car</option>
-                                    <option value="Rehber">Rehber</option>
-                                    <option value="Uçak">Uçak</option>
-                                    <option value="Gemi">Gemi</option>
+                                    @if (ViewBag.ProductTypes != null)
+                                    {
+                                        @foreach (var productType in ViewBag.ProductTypes)
+                                        {
+                                            <option value="@productType.GetProperty("code").GetString()">@productType.GetProperty("name").GetString()</option>
+                                        }
+                                    }
                                 </select>
                             </div>
                         </div>
@@ -238,7 +238,7 @@
         $(document).ready(function() {
             $('#productTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
                 },
                 pageLength: 25,
                 order: [[3, 'desc']]

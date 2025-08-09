@@ -80,9 +80,15 @@
                             </label>
                             <select asp-for="Currency" class="form-select" required>
                                 <option value="">Para Birimi Seçin</option>
-                                <option value="EUR">EUR - Euro</option>
-                                <option value="USD">USD - Amerikan Doları</option>
-                                <option value="TRY">TRY - Türk Lirası</option>
+                                @if (ViewBag.Currencies != null)
+                                {
+                                    @foreach (var currency in ViewBag.Currencies)
+                                    {
+                                        <option value="@currency.GetProperty("code").GetString()">
+                                            @currency.GetProperty("flag").GetString() @currency.GetProperty("code").GetString() - @currency.GetProperty("name").GetString()
+                                        </option>
+                                    }
+                                }
                             </select>
                             <span asp-validation-for="Currency" class="text-danger small"></span>
                         </div>

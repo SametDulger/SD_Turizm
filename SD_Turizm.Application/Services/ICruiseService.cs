@@ -7,7 +7,7 @@ namespace SD_Turizm.Application.Services
     public interface ICruiseService
     {
         Task<IEnumerable<Cruise>> GetAllAsync();
-        Task<Cruise> GetByIdAsync(int id);
+        Task<Cruise?> GetByIdAsync(int id);
         Task<Cruise> CreateAsync(Cruise entity);
         Task UpdateAsync(Cruise entity);
         Task DeleteAsync(int id);

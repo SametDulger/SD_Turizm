@@ -1,57 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using SD_Turizm.Web.Models.DTOs;
-using System.Text;
-using System.Text.Json;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class HotelPriceController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly IHotelPriceApiService _hotelPriceApiService;
+        private readonly ILookupApiService _lookupApiService;
+        private readonly IHotelApiService _hotelApiService;
 
-        public HotelPriceController(HttpClient httpClient, IConfiguration configuration)
+        public HotelPriceController(IHotelPriceApiService hotelPriceApiService, ILookupApiService lookupApiService, IHotelApiService hotelApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _hotelPriceApiService = hotelPriceApiService;
+            _lookupApiService = lookupApiService;
+            _hotelApiService = hotelApiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}HotelPrice");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entities = JsonSerializer.Deserialize<List<HotelPriceDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entities);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return View(new List<HotelPriceDto>());
+            var entities = await _hotelPriceApiService.GetAllHotelPricesAsync() ?? new List<HotelPriceDto>();
+            return View(entities);
         }
 
         public async Task<IActionResult> Create()
         {
-            try
-            {
-                var hotelsResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Hotels");
-                if (hotelsResponse.IsSuccessStatusCode)
-                {
-                    var hotelsContent = await hotelsResponse.Content.ReadAsStringAsync();
-                    var hotels = JsonSerializer.Deserialize<List<HotelDto>>(hotelsContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    ViewBag.HotelId = hotels?.Select(h => new SelectListItem { Value = h.Id.ToString(), Text = $"{h.Code} - {h.Name}" }).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Otel listesi yüklenirken hata oluştu: {ex.Message}");
-            }
+            await LoadLookupData();
             return View();
         }
 
@@ -61,131 +37,101 @@ namespace SD_Turizm.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                var result = await _hotelPriceApiService.CreateHotelPriceAsync(entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync($"{_apiBaseUrl}HotelPrice", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Otel fiyatı oluşturulurken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            try
+            var entity = await _hotelPriceApiService.GetHotelPriceByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}HotelPrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<HotelPriceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            try
+            var entity = await _hotelPriceApiService.GetHotelPriceByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}HotelPrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<HotelPriceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    var hotelsResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Hotels");
-                    if (hotelsResponse.IsSuccessStatusCode)
-                    {
-                        var hotelsContent = await hotelsResponse.Content.ReadAsStringAsync();
-                        var hotels = JsonSerializer.Deserialize<List<HotelDto>>(hotelsContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        ViewBag.HotelId = hotels?.Select(h => new SelectListItem { Value = h.Id.ToString(), Text = $"{h.Code} - {h.Name}" }).ToList();
-                    }
-                    
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, HotelPriceDto entity)
         {
+            if (id != entity.Id)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                try
+                var result = await _hotelPriceApiService.UpdateHotelPriceAsync(id, entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PutAsync($"{_apiBaseUrl}HotelPrice/{id}", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Otel fiyatı güncellenirken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var entity = await _hotelPriceApiService.GetHotelPriceByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}HotelPrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<HotelPriceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
+            var result = await _hotelPriceApiService.DeleteHotelPriceAsync(id);
+            if (result)
             {
-                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}HotelPrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError("", "Otel fiyatı silinirken hata oluştu.");
+            return View();
+        }
+
+        private async Task LoadLookupData()
+        {
+            // Load Hotels
+            var hotels = await _hotelApiService.GetAllHotelsAsync() ?? new List<HotelDto>();
+            ViewBag.HotelId = hotels.Select(h => new { Value = h.Id, Text = h.Name }).ToList();
+
+            // Load Room Types
+            var roomTypes = await _lookupApiService.GetRoomTypesAsync() ?? new List<dynamic>();
+            ViewBag.RoomTypes = roomTypes;
+
+            // Load Board Types
+            var boardTypes = await _lookupApiService.GetBoardTypesAsync() ?? new List<dynamic>();
+            ViewBag.BoardTypes = boardTypes;
+
+            // Load Room Locations
+            var roomLocations = await _lookupApiService.GetRoomLocationsAsync() ?? new List<dynamic>();
+            ViewBag.RoomLocations = roomLocations;
+
+            // Load Currencies
+            var currencies = await _lookupApiService.GetCurrenciesAsync() ?? new List<dynamic>();
+            ViewBag.Currencies = currencies;
         }
     }
-} 
+}

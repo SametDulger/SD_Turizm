@@ -1,33 +1,35 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SD_Turizm.Web.Models.DTOs;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class SalesController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly ISaleApiService _saleApiService;
+        private readonly ILookupApiService _lookupApiService;
 
-        public SalesController(HttpClient httpClient, IConfiguration configuration)
+        public SalesController(ISaleApiService saleApiService, ILookupApiService lookupApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _saleApiService = saleApiService;
+            _lookupApiService = lookupApiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var sales = await _httpClient.GetFromJsonAsync<List<SaleDto>>($"{_apiBaseUrl}Sales");
+            var sales = await _saleApiService.GetAllSalesAsync();
+            await LoadLookupData();
             return View(sales);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var sale = await _httpClient.GetFromJsonAsync<SaleDto>($"{_apiBaseUrl}Sales/{id}");
+            var sale = await _saleApiService.GetSaleByIdAsync(id);
             if (sale == null)
             {
                 return NotFound();
@@ -35,18 +37,15 @@ namespace SD_Turizm.Web.Controllers
             return View(sale);
         }
 
-        public async Task<IActionResult> DetailsByPNR(string pnrNumber)
+        public IActionResult DetailsByPNR(string pnrNumber)
         {
-            var sale = await _httpClient.GetFromJsonAsync<SaleDto>($"{_apiBaseUrl}Sales/pnr/{pnrNumber}");
-            if (sale == null)
-            {
-                return NotFound();
-            }
-            return View("Details", sale);
+            // Bu endpoint SaleApiService'de yok, şimdilik Details'e yönlendir
+            return RedirectToAction(nameof(Details), new { id = 0 });
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await LoadLookupData();
             return View();
         }
 
@@ -56,8 +55,8 @@ namespace SD_Turizm.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var response = await _httpClient.PostAsJsonAsync($"{_apiBaseUrl}Sales", sale);
-                if (response.IsSuccessStatusCode)
+                var result = await _saleApiService.CreateSaleAsync(sale);
+                if (result != null)
                 {
                     return RedirectToAction(nameof(Index));
                 }
@@ -68,11 +67,12 @@ namespace SD_Turizm.Web.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var sale = await _httpClient.GetFromJsonAsync<SaleDto>($"{_apiBaseUrl}Sales/{id}");
+            var sale = await _saleApiService.GetSaleByIdAsync(id);
             if (sale == null)
             {
                 return NotFound();
             }
+            await LoadLookupData();
             return View(sale);
         }
 
@@ -87,8 +87,8 @@ namespace SD_Turizm.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                var response = await _httpClient.PutAsJsonAsync($"{_apiBaseUrl}Sales/{id}", sale);
-                if (response.IsSuccessStatusCode)
+                var result = await _saleApiService.UpdateSaleAsync(id, sale);
+                if (result != null)
                 {
                     return RedirectToAction(nameof(Index));
                 }
@@ -99,7 +99,7 @@ namespace SD_Turizm.Web.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var sale = await _httpClient.GetFromJsonAsync<SaleDto>($"{_apiBaseUrl}Sales/{id}");
+            var sale = await _saleApiService.GetSaleByIdAsync(id);
             if (sale == null)
             {
                 return NotFound();
@@ -111,30 +111,40 @@ namespace SD_Turizm.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}Sales/{id}");
-            if (response.IsSuccessStatusCode)
+            var result = await _saleApiService.DeleteSaleAsync(id);
+            if (result)
             {
                 return RedirectToAction(nameof(Index));
             }
+            ModelState.AddModelError("", "Error deleting sale");
+            return View();
+        }
+
+        public IActionResult ByDateRange(DateTime startDate, DateTime endDate)
+        {
+            // Bu endpoint SaleApiService'de yok, şimdilik Index'e yönlendir
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> ByDateRange(DateTime startDate, DateTime endDate)
+        public IActionResult ByAgency(string agencyCode)
         {
-            var sales = await _httpClient.GetFromJsonAsync<List<SaleDto>>($"{_apiBaseUrl}Sales/date-range?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
-            return View("Index", sales);
+            // Bu endpoint SaleApiService'de yok, şimdilik Index'e yönlendir
+            return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> ByAgency(string agencyCode)
+        public IActionResult ByCariCode(string cariCode)
         {
-            var sales = await _httpClient.GetFromJsonAsync<List<SaleDto>>($"{_apiBaseUrl}Sales/agency/{agencyCode}");
-            return View("Index", sales);
+            // Bu endpoint SaleApiService'de yok, şimdilik Index'e yönlendir
+            return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> ByCariCode(string cariCode)
+        private async Task LoadLookupData()
         {
-            var sales = await _httpClient.GetFromJsonAsync<List<SaleDto>>($"{_apiBaseUrl}Sales/cari/{cariCode}");
-            return View("Index", sales);
+            var currencies = await _lookupApiService.GetCurrenciesAsync() ?? new List<dynamic>();
+            ViewBag.Currencies = currencies;
+
+            var saleStatuses = await _lookupApiService.GetSaleStatusesAsync() ?? new List<dynamic>();
+            ViewBag.SaleStatuses = saleStatuses;
         }
     }
 } 

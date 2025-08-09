@@ -1,52 +1,116 @@
-@model ErrorViewModel
+@model SD_Turizm.Web.Models.ErrorViewModel
 @{
     ViewData["Title"] = "Hata";
 }
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
-        <div class="d-flex align-items-center">
-            <div class="bg-gradient-danger rounded-circle p-3 me-3 shadow-sm">
-                <i class="fas fa-exclamation-triangle fa-2x text-white"></i>
-            </div>
-            <div>
-                <h1 class="h2 mb-0 text-dark fw-bold">Hata</h1>
-                <p class="text-muted mb-0">Bir hata oluştu, lütfen tekrar deneyin</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-danger text-white">
-            <h6 class="m-0 fw-bold">
-                <i class="fas fa-exclamation-triangle me-2"></i>Bir hata oluştu
-            </h6>
-        </div>
-        <div class="card-body">
-            <h2 class="text-danger">İsteğiniz işlenirken bir hata oluştu.</h2>
+<style>
+    .error-container {
+        text-align: center;
+        padding: 4rem 0;
+    }
 
-            @if (Model.ShowRequestId)
-            {
-                <div class="alert alert-info">
-                    <strong>İstek ID:</strong> <code>@Model.RequestId</code>
-                </div>
-            }
+    .error-icon {
+        font-size: 5rem;
+        color: #dc3545;
+        margin-bottom: 1rem;
+    }
 
-            <div class="alert alert-warning">
-                <h5><i class="fas fa-code"></i> Geliştirme Modu</h5>
-                <p class="mb-0">
-                    <strong>Development</strong> ortamına geçiş yaparak, oluşan hata hakkında daha detaylı bilgi görüntüleyebilirsiniz.
-                </p>
-            </div>
-            
-            <div class="alert alert-info">
-                <p class="mb-0">
-                    <strong>Development ortamı dağıtılan uygulamalar için etkinleştirilmemelidir.</strong>
-                    Bu, istisnalardan gelen hassas bilgilerin son kullanıcılara görüntülenmesine neden olabilir.
-                    Yerel hata ayıklama için, <strong>ASPNETCORE_ENVIRONMENT</strong> ortam değişkenini <strong>Development</strong> olarak ayarlayın
-                    ve uygulamayı yeniden başlatın.
-                </p>
-            </div>
+    .error-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .error-message {
+        font-size: 1.2rem;
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    .error-details {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        text-align: left;
+    }
+
+    .btn-home {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+
+    .btn-home:hover {
+        transform: translateY(-2px);
+        color: white;
+    }
+</style>
+
+<div class="container">
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
+        
+        <h1 class="error-title">Üzgünüz, bir hata oluştu</h1>
+        
+        <p class="error-message">
+            İsteğiniz işlenirken beklenmeyen bir hata meydana geldi. Lütfen daha sonra tekrar deneyiniz.
+        </p>
+
+        @if (Model?.ShowRequestId == true)
+        {
+            <div class="error-details">
+                <h5><i class="fas fa-info-circle"></i> Hata Detayları</h5>
+                <p><strong>İstek ID:</strong> <code>@Model.RequestId</code></p>
+                <p><small class="text-muted">Bu ID'yi teknik destek ekibiyle paylaşabilirsiniz.</small></p>
+            </div>
+        }
+
+        <div class="mt-4">
+            <a href="@Url.Action("Index", "Home")" class="btn-home">
+                <i class="fas fa-home"></i> Ana Sayfaya Dön
+            </a>
+        </div>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="mt-3">
+                <a href="@Url.Action("Index", "Dashboard")" class="btn btn-outline-primary">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard'a Git
+                </a>
+            </div>
+        }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Otomatik hata raporlama (opsiyonel)
+        $(document).ready(function() {
+            // Hata detaylarını gizle/göster
+            $('.error-details').hide();
+            
+            // Detayları göster butonu ekle (eğer request ID varsa)
+            @if (Model?.ShowRequestId == true)
+            {
+                <text>
+                $('.error-message').after('<button type="button" class="btn btn-link btn-sm" id="toggleDetails">Teknik detayları göster</button>');
+                
+                $('#toggleDetails').click(function() {
+                    $('.error-details').toggle();
+                    $(this).text($(this).text().includes('göster') ? 'Teknik detayları gizle' : 'Teknik detayları göster');
+                });
+                </text>
+            }
+        });
+    </script>
+}
