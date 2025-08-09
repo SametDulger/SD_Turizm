@@ -17,7 +17,7 @@ namespace SD_Turizm.Application.Services
         {
             return await _unitOfWork.Repository<Airline>().GetAllAsync();
         }
-        public async Task<Airline> GetByIdAsync(int id)
+        public async Task<Airline?> GetByIdAsync(int id)
         {
             return await _unitOfWork.Repository<Airline>().GetByIdAsync(id);
         }

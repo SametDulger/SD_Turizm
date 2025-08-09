@@ -1,0 +1,224 @@
+@model SD_Turizm.Web.Models.DTOs.UserDto
+@{
+    ViewData["Title"] = "Kullanıcı Sil";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index")">Kullanıcılar</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Sil</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-danger">
+                <i class="fas fa-user-times"></i> Kullanıcı Sil
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> UYARI: Kullanıcı Silme İşlemi
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="fas fa-exclamation-triangle"></i> DİKKAT!</h5>
+                        <p class="mb-0">
+                            <strong>@Model.FirstName @Model.LastName</strong> adlı kullanıcıyı silmek üzeresiniz. 
+                            Bu işlem <strong>geri alınamaz</strong> ve aşağıdaki sonuçları doğurur:
+                        </p>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-list-ul"></i> Silinecek Veriler:</h6>
+                        <ul class="mb-0">
+                            <li>Kullanıcı hesabı ve profil bilgileri</li>
+                            <li>Giriş geçmişi ve session bilgileri</li>
+                            <li>Kullanıcıya ait izinler ve rol atamaları</li>
+                            <li>Kullanıcının oluşturduğu loglar (varsa)</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">Silinecek Kullanıcı Bilgileri</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <td><strong>Ad Soyad:</strong></td>
+                                            <td>@Model.FirstName @Model.LastName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Kullanıcı Adı:</strong></td>
+                                            <td>@Model.Username</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>E-posta:</strong></td>
+                                            <td>@Model.Email</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-borderless mb-0">
+                                        <tr>
+                                            <td><strong>Rol:</strong></td>
+                                            <td><span class="badge bg-primary">@Model.Role</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Durum:</strong></td>
+                                            <td>
+                                                                <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger")">
+                    @(Model.IsActive ? "Aktif" : "Pasif")
+                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Kayıt Tarihi:</strong></td>
+                                            <td>@Model.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+                        <input asp-for="Id" type="hidden" />
+                        
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                            <label class="form-check-label" for="confirmDelete">
+                                <strong>Bu kullanıcıyı silmek istediğimi onaylıyorum</strong>
+                            </label>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> İptal Et
+                            </a>
+                            <button type="submit" class="btn btn-danger" id="deleteButton" disabled>
+                                <i class="fas fa-trash"></i> Kullanıcıyı Sil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-lightbulb"></i> Alternatif Seçenekler
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p>Kullanıcıyı tamamen silmek yerine aşağıdaki seçenekleri değerlendirebilirsiniz:</p>
+                    
+                    <div class="d-grid gap-2">
+                        @if (Model.IsActive)
+                        {
+                            <button class="btn btn-outline-warning btn-sm" onclick="deactivateUser(@Model.Id)">
+                                <i class="fas fa-user-times"></i> Kullanıcıyı Pasifleştir
+                            </button>
+                        }
+                        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i> Bilgileri Düzenle
+                        </a>
+                        <a href="@Url.Action("ChangePassword", new { id = Model.Id })" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-key"></i> Şifre Değiştir
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Role == "Admin")
+            {
+                <div class="card border-warning mt-3">
+                    <div class="card-header bg-warning">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-shield-alt"></i> Yönetici Uyarısı
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning mb-0">
+                            <small>
+                                <strong>DİKKAT:</strong> Bu kullanıcı yönetici rolüne sahiptir. 
+                                Silme işleminden önce sistemde başka yönetici kullanıcıların 
+                                olduğundan emin olun.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="card border-secondary mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-database"></i> Veri Koruma
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small class="text-muted">
+                        Kullanıcı silinse bile, bu kullanıcının oluşturduğu veriler 
+                        (satışlar, raporlar vb.) sistemde korunur. Sadece kullanıcı 
+                        bilgileri ve giriş yetkisi kaldırılır.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Onay checkbox'ını kontrol et
+            $('#confirmDelete').change(function() {
+                $('#deleteButton').prop('disabled', !this.checked);
+            });
+
+            // Form submit uyarısı
+            $('form').on('submit', function(e) {
+                if (!confirm('Bu kullanıcıyı silmek istediğinizden EMİN MİSİNİZ? Bu işlem GERİ ALINAMAZ!')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+
+        function deactivateUser(userId) {
+            if (confirm('Bu kullanıcıyı pasifleştirmek istediğinizden emin misiniz?')) {
+                fetch(`/User/Deactivate/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Kullanıcı başarıyla pasifleştirildi.');
+                        window.location.href = '@Url.Action("Index")';
+                    } else {
+                        alert('İşlem başarısız oldu.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Bir hata oluştu.');
+                });
+            }
+        }
+    </script>
+}

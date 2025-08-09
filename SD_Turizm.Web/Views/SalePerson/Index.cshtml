@@ -48,21 +48,28 @@
                                 <td>@item.Id</td>
                                 <td>@item.SaleId</td>
                                 <td>
-                                    @switch (item.PersonType)
-                                    {
-                                        case "Adult":
-                                            <span class="badge bg-primary">Yetişkin</span>
-                                            break;
-                                        case "Child":
-                                            <span class="badge bg-success">Çocuk</span>
-                                            break;
-                                        case "Infant":
-                                            <span class="badge bg-info">Bebek</span>
-                                            break;
-                                        default:
-                                            <span class="badge bg-secondary">@item.PersonType</span>
-                                            break;
+                                    @{
+                                        string typeName = item.PersonType;
+                                        if (ViewBag.PersonTypes != null)
+                                        {
+                                            foreach (var pt in ViewBag.PersonTypes)
+                                            {
+                                                if (pt.GetProperty("code").GetString() == item.PersonType)
+                                                {
+                                                    typeName = pt.GetProperty("name").GetString();
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        var badgeClass = item.PersonType switch
+                                        {
+                                            "Adult" => "bg-primary",
+                                            "Child" => "bg-success",
+                                            "Infant" => "bg-info",
+                                            _ => "bg-secondary"
+                                        };
                                     }
+                                    <span class="badge @badgeClass">@typeName</span>
                                 </td>
                                 <td>@item.FirstName</td>
                                 <td>@item.LastName</td>
@@ -95,7 +102,7 @@
         $(document).ready(function() {
             $('#salePersonTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
                 },
                 responsive: true,
                 pageLength: 25,

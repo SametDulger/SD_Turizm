@@ -48,18 +48,31 @@
                                 <td>@item.Id</td>
                                 <td>@item.CariCode</td>
                                 <td>
-                                    @switch (item.TransactionType)
-                                    {
-                                        case "Debit":
-                                            <span class="badge bg-danger">Borç</span>
-                                            break;
-                                        case "Credit":
-                                            <span class="badge bg-success">Alacak</span>
-                                            break;
-                                        default:
-                                            <span class="badge bg-secondary">@item.TransactionType</span>
-                                            break;
+                                    @{
+                                        string typeName = item.TransactionType;
+                                        if (ViewBag.TransactionTypes != null)
+                                        {
+                                            foreach (var tt in ViewBag.TransactionTypes)
+                                            {
+                                                if (tt.GetProperty("code").GetString() == item.TransactionType)
+                                                {
+                                                    typeName = tt.GetProperty("name").GetString();
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        var badgeClass = item.TransactionType switch
+                                        {
+                                            "Debit" => "bg-danger",
+                                            "Credit" => "bg-success",
+                                            "BORC" => "bg-danger",
+                                            "ALACAK" => "bg-success",
+                                            "Expense" => "bg-danger",
+                                            "Income" => "bg-success",
+                                            _ => "bg-secondary"
+                                        };
                                     }
+                                    <span class="badge @badgeClass">@typeName</span>
                                 </td>
                                 <td>@item.Amount.ToString("N2")</td>
                                 <td>@item.Currency</td>
@@ -92,7 +105,7 @@
         $(document).ready(function() {
             $('#cariTransactionTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
                 },
                 responsive: true,
                 pageLength: 25,

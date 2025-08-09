@@ -1,0 +1,128 @@
+@model SD_Turizm.Web.Models.DTOs.VendorDto
+
+@{
+    ViewData["Title"] = "Tedarikçi Düzenle";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-warning rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-edit fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Tedarikçi Düzenle</h1>
+                <p class="text-muted mb-0">@Model.Name</p>
+            </div>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-warning text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-edit me-2"></i>Tedarikçi Bilgileri
+            </h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="control-label fw-bold">Tedarikçi Adı</label>
+                            <input asp-for="Name" class="form-control" placeholder="Tedarikçi adını girin" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Code" class="control-label fw-bold">Kod</label>
+                            <input asp-for="Code" class="form-control" placeholder="Tedarikçi kodunu girin" />
+                            <span asp-validation-for="Code" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="control-label fw-bold">Telefon</label>
+                            <input asp-for="Phone" class="form-control" placeholder="Telefon numarasını girin" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="control-label fw-bold">E-posta</label>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="E-posta adresini girin" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Country" class="control-label fw-bold">Ülke</label>
+                            <input asp-for="Country" class="form-control" placeholder="Ülke adını girin" />
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Type" class="control-label fw-bold">Tedarikçi Türü</label>
+                            <select asp-for="Type" class="form-control">
+                                <option value="">Tedarikçi türünü seçin</option>
+                                @if (ViewBag.VendorTypes != null)
+                                {
+                                    @foreach (var vendorType in ViewBag.VendorTypes)
+                                    {
+                                        <option value="@vendorType.GetProperty("code").GetString()">@vendorType.GetProperty("name").GetString()</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="Type" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Address" class="control-label fw-bold">Adres</label>
+                    <textarea asp-for="Address" class="form-control" rows="3" placeholder="Adres bilgilerini girin"></textarea>
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="control-label fw-bold">Açıklama</label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Açıklama girin"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label fw-bold">Aktif</label>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-warning btn-lg">
+                        <i class="fas fa-save me-2"></i>Güncelle
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg ms-2">
+                        <i class="fas fa-times me-2"></i>İptal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -52,24 +52,29 @@
                                 <td>@item.TotalAmount.ToString("N2")</td>
                                 <td>@item.Currency</td>
                                 <td>
-                                    @switch (item.Status)
-                                    {
-                                        case "Pending":
-                                            <span class="badge bg-warning text-dark">Beklemede</span>
-                                            break;
-                                        case "Confirmed":
-                                            <span class="badge bg-success">Onaylandı</span>
-                                            break;
-                                        case "Cancelled":
-                                            <span class="badge bg-danger">İptal Edildi</span>
-                                            break;
-                                        case "Completed":
-                                            <span class="badge bg-info">Tamamlandı</span>
-                                            break;
-                                        default:
-                                            <span class="badge bg-secondary">@item.Status</span>
-                                            break;
+                                    @{
+                                        string statusName = item.Status;
+                                        if (ViewBag.SaleStatuses != null)
+                                        {
+                                            foreach (var s in ViewBag.SaleStatuses)
+                                            {
+                                                if (s.GetProperty("code").GetString() == item.Status)
+                                                {
+                                                    statusName = s.GetProperty("name").GetString();
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        var badgeClass = item.Status switch
+                                        {
+                                            "Pending" => "bg-warning text-dark",
+                                            "Confirmed" => "bg-success",
+                                            "Cancelled" => "bg-danger", 
+                                            "Completed" => "bg-info",
+                                            _ => "bg-secondary"
+                                        };
                                     }
+                                    <span class="badge @badgeClass">@statusName</span>
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
@@ -98,7 +103,7 @@
         $(document).ready(function() {
             $('#salesTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
                 },
                 responsive: true,
                 pageLength: 25,

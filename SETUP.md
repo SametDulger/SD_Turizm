@@ -7,6 +7,7 @@ SD Turizm turizm yönetim sisteminin kurulum ve çalıştırma talimatları.
 ### Gerekli Yazılımlar
 - **.NET 9.0 SDK** - [İndir](https://dotnet.microsoft.com/download/dotnet/9.0)
 - **SQL Server** - LocalDB, Express veya tam instance
+- **Redis** - Cache için Redis server (opsiyonel)
 - **Visual Studio 2022** veya **VS Code** (C# extension ile)
 - **Entity Framework Tools** - Migration'lar için global tool
 
@@ -75,6 +76,11 @@ dotnet ef migrations add InitialCreate --project ../SD_Turizm.Infrastructure --s
 dotnet ef database update --project ../SD_Turizm.Infrastructure --startup-project .
 ```
 
+Bu komutlar otomatik olarak:
+- ✅ **39 tablo** oluşturur (Hotels, Sales, Tours, Users, vb.)
+- ✅ **Seed data** ekler (demo veriler, admin kullanıcısı)
+- ✅ **İndeksler ve kısıtlamalar** oluşturur
+
 ### 6. Projeyi Derleyin
 
 ```bash
@@ -104,7 +110,7 @@ dotnet run
 Başarılı başlatma sonrası:
 
 - **API Swagger UI**: https://localhost:7001/swagger
-- **API Base URL**: https://localhost:7001/api
+- **API Base URL**: https://localhost:7001/api/v2
 - **Web Uygulaması**: https://localhost:5001
 - **Web HTTP**: http://localhost:5000
 
@@ -112,6 +118,29 @@ Başarılı başlatma sonrası:
 
 - **Kullanıcı Adı**: `admin`
 - **Şifre**: `Admin123!`
+
+## 🧪 Test Çalıştırma
+
+```bash
+# Tüm testleri çalıştır
+dotnet test
+
+# Coverage ile test çalıştır
+dotnet test --collect:"XPlat Code Coverage"
+
+# Belirli bir test projesini çalıştır
+dotnet test SD_Turizm.Tests
+```
+
+## 📊 API Documentation
+
+- **Swagger UI**: `https://localhost:7001/swagger`
+- **API Base URL**: `https://localhost:7001/api/v2`
+
+## 🔍 Health Checks
+
+- **API Health**: `https://localhost:7001/health`
+- **Health Checks UI**: `https://localhost:7001/healthchecks-ui`
 
 ## 🗄️ Veritabanı Yönetimi
 
@@ -155,5 +184,17 @@ dotnet ef database drop --project ../SD_Turizm.Infrastructure --startup-project 
 dotnet ef migrations remove --project ../SD_Turizm.Infrastructure --startup-project .
 dotnet ef migrations add InitialCreate --project ../SD_Turizm.Infrastructure --startup-project .
 dotnet ef database update --project ../SD_Turizm.Infrastructure --startup-project .
+```
+
+#### 5. Test Çalıştırma
+```bash
+# Tüm testleri çalıştır
+dotnet test
+
+# Coverage ile test çalıştır
+dotnet test --collect:"XPlat Code Coverage"
+
+# Belirli bir test projesini çalıştır
+dotnet test SD_Turizm.Tests
 ```
 

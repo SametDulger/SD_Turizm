@@ -48,9 +48,13 @@
                         <label asp-for="PersonType" class="form-label"><i class="fas fa-users"></i> Kişi Tipi</label>
                         <select asp-for="PersonType" class="form-select" required>
                             <option value="">Kişi Tipi Seçin</option>
-                            <option value="PAX">Yolcu</option>
-                            <option value="CHD">Çocuk</option>
-                            <option value="INF">Bebek</option>
+                            @if (ViewBag.PersonTypes != null)
+                            {
+                                @foreach (var personType in ViewBag.PersonTypes)
+                                {
+                                    <option value="@personType.GetProperty("code").GetString()">@personType.GetProperty("name").GetString()</option>
+                                }
+                            }
                         </select>
                         <span asp-validation-for="PersonType" class="text-danger small"></span>
                     </div>

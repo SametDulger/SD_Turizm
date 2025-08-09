@@ -34,9 +34,15 @@
                         <label asp-for="FromCurrency" class="form-label"><i class="fas fa-arrow-right"></i> Kaynak Para Birimi</label>
                         <select asp-for="FromCurrency" class="form-select" required>
                             <option value="">Para Birimi Seçin</option>
-                            <option value="EUR">EUR</option>
-                            <option value="USD">USD</option>
-                            <option value="TRY">TRY</option>
+                            @if(ViewBag.Currencies != null)
+                            {
+                                @foreach (var currency in ViewBag.Currencies)
+                                {
+                                    <option value="@currency.GetProperty("code").GetString()">
+                                        @currency.GetProperty("flag").GetString() @currency.GetProperty("code").GetString() - @currency.GetProperty("name").GetString()
+                                    </option>
+                                }
+                            }
                         </select>
                         <span asp-validation-for="FromCurrency" class="text-danger small"></span>
                     </div>
@@ -45,9 +51,15 @@
                         <label asp-for="ToCurrency" class="form-label"><i class="fas fa-arrow-left"></i> Hedef Para Birimi</label>
                         <select asp-for="ToCurrency" class="form-select" required>
                             <option value="">Para Birimi Seçin</option>
-                            <option value="EUR">EUR</option>
-                            <option value="USD">USD</option>
-                            <option value="TRY">TRY</option>
+                            @if(ViewBag.Currencies != null)
+                            {
+                                @foreach (var currency in ViewBag.Currencies)
+                                {
+                                    <option value="@currency.GetProperty("code").GetString()">
+                                        @currency.GetProperty("flag").GetString() @currency.GetProperty("code").GetString() - @currency.GetProperty("name").GetString()
+                                    </option>
+                                }
+                            }
                         </select>
                         <span asp-validation-for="ToCurrency" class="text-danger small"></span>
                     </div>

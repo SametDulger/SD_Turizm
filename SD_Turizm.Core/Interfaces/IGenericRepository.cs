@@ -17,5 +17,6 @@ namespace SD_Turizm.Core.Interfaces
         Task DeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
         IQueryable<T> Query();
+        IQueryable<T> GetQueryable();
     }
 } 
