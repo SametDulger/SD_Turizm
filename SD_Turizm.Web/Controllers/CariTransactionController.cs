@@ -1,42 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SD_Turizm.Web.Models.DTOs;
-using System.Text;
-using System.Text.Json;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class CariTransactionController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly ICariTransactionApiService _cariTransactionApiService;
+        private readonly ILookupApiService _lookupApiService;
 
-        public CariTransactionController(HttpClient httpClient, IConfiguration configuration)
+        public CariTransactionController(ICariTransactionApiService cariTransactionApiService, ILookupApiService lookupApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _cariTransactionApiService = cariTransactionApiService;
+            _lookupApiService = lookupApiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}CariTransaction");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entities = JsonSerializer.Deserialize<List<CariTransactionDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entities);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return View(new List<CariTransactionDto>());
+            var entities = await _cariTransactionApiService.GetAllTransactionsAsync() ?? new List<CariTransactionDto>();
+            await LoadLookupData();
+            return View(entities);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await LoadLookupData();
             return View();
         }
 
@@ -46,122 +36,88 @@ namespace SD_Turizm.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                var result = await _cariTransactionApiService.CreateTransactionAsync(entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync($"{_apiBaseUrl}CariTransaction", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Cari işlem oluşturulurken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            try
+            var entity = await _cariTransactionApiService.GetTransactionByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}CariTransaction/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<CariTransactionDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            try
+            var entity = await _cariTransactionApiService.GetTransactionByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}CariTransaction/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<CariTransactionDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            await LoadLookupData();
+            return View(entity);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, CariTransactionDto entity)
         {
+            if (id != entity.Id)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                try
+                var result = await _cariTransactionApiService.UpdateTransactionAsync(id, entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PutAsync($"{_apiBaseUrl}CariTransaction/{id}", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Cari işlem güncellenirken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var entity = await _cariTransactionApiService.GetTransactionByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}CariTransaction/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<CariTransactionDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
+            var result = await _cariTransactionApiService.DeleteTransactionAsync(id);
+            if (result)
             {
-                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}CariTransaction/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError("", "Cari işlem silinirken hata oluştu.");
+            return View();
+        }
+
+        private async Task LoadLookupData()
+        {
+            var currencies = await _lookupApiService.GetCurrenciesAsync() ?? new List<dynamic>();
+            ViewBag.Currencies = currencies;
+
+            var transactionTypes = await _lookupApiService.GetTransactionTypesAsync() ?? new List<dynamic>();
+            ViewBag.TransactionTypes = transactionTypes;
         }
     }
-} 
+}

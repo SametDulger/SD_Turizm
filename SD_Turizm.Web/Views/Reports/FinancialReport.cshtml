@@ -189,9 +189,15 @@
                             <div class="mb-3">
                                 <label class="form-label">Para Birimi</label>
                                 <select class="form-select" name="currency">
-                                    <option value="TRY" selected="@(ViewBag.Currency == "TRY")">TRY</option>
-                                    <option value="USD" selected="@(ViewBag.Currency == "USD")">USD</option>
-                                    <option value="EUR" selected="@(ViewBag.Currency == "EUR")">EUR</option>
+                                    @if (ViewBag.Currencies != null)
+                                    {
+                                        @foreach (var currency in ViewBag.Currencies)
+                                        {
+                                            <option value="@currency.GetProperty("code").GetString()" selected="@(ViewBag.Currency == currency.GetProperty("code").GetString())">
+                                                @currency.GetProperty("flag").GetString() @currency.GetProperty("code").GetString() - @currency.GetProperty("name").GetString()
+                                            </option>
+                                        }
+                                    }
                                 </select>
                             </div>
                         </div>
@@ -214,7 +220,7 @@
         $(document).ready(function() {
             $('#financialTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
                 },
                 pageLength: 25,
                 order: [[7, 'desc']]

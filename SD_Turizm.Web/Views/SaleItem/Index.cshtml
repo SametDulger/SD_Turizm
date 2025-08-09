@@ -48,36 +48,33 @@
                                 <td>@item.Id</td>
                                 <td>@item.SaleId</td>
                                 <td>
-                                    @switch (item.ItemType)
-                                    {
-                                        case "Hotel":
-                                            <span class="badge bg-info">Otel</span>
-                                            break;
-                                        case "Tour":
-                                            <span class="badge bg-success">Tur</span>
-                                            break;
-                                        case "Transfer":
-                                            <span class="badge bg-warning text-dark">Transfer</span>
-                                            break;
-                                        case "RentACar":
-                                            <span class="badge bg-secondary">Araç Kiralama</span>
-                                            break;
-                                        case "Guide":
-                                            <span class="badge bg-primary">Rehber</span>
-                                            break;
-                                        case "Airline":
-                                            <span class="badge bg-info">Havayolu</span>
-                                            break;
-                                        case "Cruise":
-                                            <span class="badge bg-primary">Kruvaziyer</span>
-                                            break;
-                                        case "Package":
-                                            <span class="badge bg-dark">Paket</span>
-                                            break;
-                                        default:
-                                            <span class="badge bg-secondary">@item.ItemType</span>
-                                            break;
+                                    @{
+                                        string typeName = item.ItemType;
+                                        if (ViewBag.VendorTypes != null)
+                                        {
+                                            foreach (var vt in ViewBag.VendorTypes)
+                                            {
+                                                if (vt.GetProperty("code").GetString() == item.ItemType)
+                                                {
+                                                    typeName = vt.GetProperty("name").GetString();
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        var badgeClass = item.ItemType switch
+                                        {
+                                            "Hotel" => "bg-info",
+                                            "Tour" => "bg-success",
+                                            "Transfer" => "bg-warning text-dark",
+                                            "RentACar" => "bg-secondary",
+                                            "Guide" => "bg-primary",
+                                            "Airline" => "bg-info",
+                                            "Cruise" => "bg-primary",
+                                            "Package" => "bg-dark",
+                                            _ => "bg-secondary"
+                                        };
                                     }
+                                    <span class="badge @badgeClass">@typeName</span>
                                 </td>
                                 <td>@item.ItemId</td>
                                 <td>@item.Quantity</td>
@@ -110,7 +107,7 @@
         $(document).ready(function() {
             $('#saleItemTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
                 },
                 responsive: true,
                 pageLength: 25,

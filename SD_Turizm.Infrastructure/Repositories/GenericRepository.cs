@@ -28,12 +28,19 @@ namespace SD_Turizm.Infrastructure.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.Where(x => x.IsActive).ToListAsync();
+            return await _dbSet
+                .Where(x => x.IsActive)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbSet.Where(predicate).Where(x => x.IsActive).ToListAsync();
+            return await _dbSet
+                .Where(predicate)
+                .Where(x => x.IsActive)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<T> AddAsync(T entity)
@@ -70,7 +77,15 @@ namespace SD_Turizm.Infrastructure.Repositories
 
         public IQueryable<T> Query()
         {
-            return _dbSet.Where(x => x.IsActive).AsQueryable();
+            return _dbSet
+                .Where(x => x.IsActive)
+                .AsNoTracking()
+                .AsQueryable();
+        }
+
+        public IQueryable<T> GetQueryable()
+        {
+            return _dbSet.AsQueryable();
         }
     }
 } 

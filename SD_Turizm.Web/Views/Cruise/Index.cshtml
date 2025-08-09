@@ -54,14 +54,9 @@
                                 <td>@item.StartDate.ToString("dd.MM.yyyy")</td>
                                 <td>@item.EndDate.ToString("dd.MM.yyyy")</td>
                                 <td>
-                                    @if (item.IsActive)
-                                    {
-                                        <span class="badge bg-success">Aktif</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Pasif</span>
-                                    }
+                                    <span class="badge @(item.IsActive ? "bg-success" : "bg-danger")">
+                                        @(item.IsActive ? "Aktif" : "Pasif")
+                                    </span>
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
@@ -90,7 +85,7 @@
         $(document).ready(function() {
             $('#cruiseTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
                 },
                 responsive: true,
                 pageLength: 25,

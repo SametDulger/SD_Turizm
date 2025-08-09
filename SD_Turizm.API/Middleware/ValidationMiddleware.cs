@@ -1,4 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using FluentValidation;
+using SD_Turizm.Core.Exceptions;
 using System.Text.Json;
 
 namespace SD_Turizm.API.Middleware
@@ -14,34 +16,32 @@ namespace SD_Turizm.API.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Request.Method == "POST" || context.Request.Method == "PUT")
-            {
-                context.Request.EnableBuffering();
-                
-                var originalBodyStream = context.Response.Body;
-                using var memoryStream = new MemoryStream();
-                context.Response.Body = memoryStream;
-
-                try
-                {
-                    await _next(context);
-
-                    memoryStream.Position = 0;
-                    await memoryStream.CopyToAsync(originalBodyStream);
-                }
-                finally
-                {
-                    context.Response.Body = originalBodyStream;
-                }
-            }
-            else
+            try
             {
                 await _next(context);
+            }
+            catch (FluentValidation.ValidationException ex)
+            {
+                context.Response.StatusCode = 400;
+                context.Response.ContentType = "application/json";
+
+                var response = new
+                {
+                    error = "Validation failed",
+                    details = ex.Errors.Select(e => new
+                    {
+                        field = e.PropertyName,
+                        message = e.ErrorMessage
+                    })
+                };
+
+                var json = JsonSerializer.Serialize(response);
+                await context.Response.WriteAsync(json);
             }
         }
     }
 
-    public static class ValidationExtensions
+    public static class ValidationMiddlewareExtensions
     {
         public static IApplicationBuilder UseValidation(this IApplicationBuilder builder)
         {

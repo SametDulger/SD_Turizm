@@ -32,8 +32,17 @@
                 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label asp-for="AirlineId" class="form-label"><i class="fas fa-plane"></i> Havayolu ID</label>
-                        <input asp-for="AirlineId" class="form-control" required />
+                        <label asp-for="AirlineId" class="form-label"><i class="fas fa-plane"></i> Havayolu</label>
+                        <select asp-for="AirlineId" class="form-select" required>
+                            <option value="">Havayolu Seçin</option>
+                            @if (ViewBag.AirlineId != null)
+                            {
+                                @foreach (var airline in ViewBag.AirlineId)
+                                {
+                                    <option value="@airline.Value">@airline.Text</option>
+                                }
+                            }
+                        </select>
                         <span asp-validation-for="AirlineId" class="text-danger small"></span>
                     </div>
                     
@@ -63,9 +72,15 @@
                         <label asp-for="Currency" class="form-label"><i class="fas fa-money-bill-wave"></i> Para Birimi</label>
                         <select asp-for="Currency" class="form-select" required>
                             <option value="">Para Birimi Seçin</option>
-                            <option value="EUR">EUR</option>
-                            <option value="USD">USD</option>
-                            <option value="TRY">TRY</option>
+                            @if (ViewBag.Currencies != null)
+                            {
+                                @foreach (var currency in ViewBag.Currencies)
+                                {
+                                    <option value="@currency.GetProperty("code").GetString()">
+                                        @currency.GetProperty("flag").GetString() @currency.GetProperty("code").GetString() - @currency.GetProperty("name").GetString()
+                                    </option>
+                                }
+                            }
                         </select>
                         <span asp-validation-for="Currency" class="text-danger small"></span>
                     </div>

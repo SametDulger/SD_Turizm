@@ -48,7 +48,7 @@ namespace SD_Turizm.Core.Entities
         
         public decimal TotalAmountTL { get; set; }
         
-        public int AddressId { get; set; }
+        public int? AddressId { get; set; }
         
         public virtual ICollection<SaleItem> SaleItems { get; set; }
         public virtual ICollection<SalePerson> SalePersons { get; set; }

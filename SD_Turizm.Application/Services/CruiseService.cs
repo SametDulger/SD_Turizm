@@ -17,7 +17,7 @@ namespace SD_Turizm.Application.Services
         {
             return await _unitOfWork.Repository<Cruise>().GetAllAsync();
         }
-        public async Task<Cruise> GetByIdAsync(int id)
+        public async Task<Cruise?> GetByIdAsync(int id)
         {
             return await _unitOfWork.Repository<Cruise>().GetByIdAsync(id);
         }

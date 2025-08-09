@@ -42,13 +42,13 @@
                         <label asp-for="ItemType" class="form-label"><i class="fas fa-tag"></i> Öğe Türü</label>
                         <select asp-for="ItemType" class="form-select" required>
                             <option value="">Öğe Türü Seçin</option>
-                            <option value="Hotel">Otel</option>
-                            <option value="Airline">Havayolu</option>
-                            <option value="Cruise">Kruvaziyer</option>
-                            <option value="Tour">Tur</option>
-                            <option value="Transfer">Transfer</option>
-                            <option value="RentACar">Araç Kiralama</option>
-                            <option value="Guide">Rehber</option>
+                            @if (ViewBag.VendorTypes != null)
+                            {
+                                @foreach (var vendorType in ViewBag.VendorTypes)
+                                {
+                                    <option value="@vendorType.GetProperty("code").GetString()">@vendorType.GetProperty("name").GetString()</option>
+                                }
+                            }
                         </select>
                         <span asp-validation-for="ItemType" class="text-danger small"></span>
                     </div>

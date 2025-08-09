@@ -1,0 +1,289 @@
+@model SD_Turizm.Web.Models.DTOs.UserDto
+@{
+    ViewData["Title"] = "Kullanıcı Detayları";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index")">Kullanıcılar</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Detaylar</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-user"></i> Kullanıcı Detayları
+                </h1>
+                <div>
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success fs-6">Aktif</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger fs-6">Pasif</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-id-card"></i> Kullanıcı Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Ad:</strong></td>
+                                    <td>@Model.FirstName</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Soyad:</strong></td>
+                                    <td>@Model.LastName</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Kullanıcı Adı:</strong></td>
+                                    <td>@Model.Username</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>E-posta:</strong></td>
+                                    <td>
+                                        <a href="mailto:@Model.Email">@Model.Email</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Telefon:</strong></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                                        {
+                                            <a href="tel:@Model.PhoneNumber">@Model.PhoneNumber</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Belirtilmemiş</span>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Rol:</strong></td>
+                                    <td>
+                                        <span class="badge bg-primary">@Model.Role</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Durum:</strong></td>
+                                    <td>
+                                                        <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger")">
+                    @(Model.IsActive ? "Aktif" : "Pasif")
+                </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Kullanıcı ID:</strong></td>
+                                    <td><code>@Model.Id</code></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock"></i> Zaman Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Kayıt Tarihi:</strong></p>
+                            <p class="text-muted">
+                                <i class="fas fa-calendar-plus"></i> 
+                                @Model.CreatedAt.ToString("dd MMMM yyyy, dddd", new System.Globalization.CultureInfo("tr-TR"))
+                                <br>
+                                <small>@Model.CreatedAt.ToString("HH:mm:ss")</small>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Son Giriş Tarihi:</strong></p>
+                            @if (Model.LastLoginDate.HasValue)
+                            {
+                                <p class="text-muted">
+                                    <i class="fas fa-sign-in-alt"></i> 
+                                    @Model.LastLoginDate.Value.ToString("dd MMMM yyyy, dddd", new System.Globalization.CultureInfo("tr-TR"))
+                                    <br>
+                                    <small>@Model.LastLoginDate.Value.ToString("HH:mm:ss")</small>
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="text-muted">
+                                    <i class="fas fa-times-circle"></i> 
+                                    Hiç giriş yapmamış
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-cogs"></i> İşlemler
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Düzenle
+                        </a>
+                        <a href="@Url.Action("ChangePassword", new { id = Model.Id })" class="btn btn-info">
+                            <i class="fas fa-key"></i> Şifre Değiştir
+                        </a>
+                        <hr>
+                        @if (Model.IsActive)
+                        {
+                            <button class="btn btn-outline-secondary" onclick="toggleUserStatus(@Model.Id, false)">
+                                <i class="fas fa-user-times"></i> Pasifleştir
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-success" onclick="toggleUserStatus(@Model.Id, true)">
+                                <i class="fas fa-user-check"></i> Aktifleştir
+                            </button>
+                        }
+                        <hr>
+                        <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-outline-danger">
+                            <i class="fas fa-trash"></i> Sil
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-shield-alt"></i> Güvenlik
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Güvenlik Notları</h6>
+                        <ul class="mb-0">
+                            <li>Kullanıcı şifresi güvenli bir şekilde saklanır</li>
+                            <li>Son giriş tarihi takip edilir</li>
+                            <li>Pasif kullanıcılar giriş yapamaz</li>
+                            <li>Rol değişiklikleri loglanır</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-user-shield"></i> Rol Açıklaması
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @{
+                        var alertClass = Model.Role switch
+                        {
+                            "Admin" => "alert-danger",
+                            "Manager" => "alert-warning",
+                            "Employee" => "alert-info",
+                            "User" => "alert-secondary",
+                            _ => "alert-light"
+                        };
+                        var roleDescription = Model.Role switch
+                        {
+                            "Admin" => "Tüm sistem yetkilerine sahiptir.",
+                            "Manager" => "Bölüm yönetimi yetkilerine sahiptir.",
+                            "Employee" => "Operasyonel işlem yetkilerine sahiptir.",
+                            "User" => "Temel görüntüleme yetkilerine sahiptir.",
+                            _ => "Yetki seviyesi belirsiz."
+                        };
+                        var roleName = Model.Role switch
+                        {
+                            "Admin" => "Yönetici",
+                            "Manager" => "Müdür", 
+                            "Employee" => "Çalışan",
+                            "User" => "Kullanıcı",
+                            _ => "Tanımsız Rol"
+                        };
+                    }
+                    <div class="alert @alertClass">
+                        <strong>@roleName:</strong> @roleDescription
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between">
+                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Kullanıcı Listesine Dön
+                </a>
+                <div>
+                    <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning me-2">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </a>
+                    <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleUserStatus(userId, activate) {
+            const action = activate ? 'aktifleştirmek' : 'pasifleştirmek';
+            if (confirm(`Bu kullanıcıyı ${action} istediğinizden emin misiniz?`)) {
+                const url = activate ? `/User/Activate/${userId}` : `/User/Deactivate/${userId}`;
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('İşlem başarısız oldu.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Bir hata oluştu.');
+                });
+            }
+        }
+    </script>
+}

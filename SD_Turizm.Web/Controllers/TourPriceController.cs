@@ -1,76 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using SD_Turizm.Web.Models.DTOs;
-using System.Text;
-using System.Text.Json;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class TourPriceController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly ITourPriceApiService _tourPriceApiService;
+        private readonly ILookupApiService _lookupApiService;
+        private readonly ITourApiService _tourApiService;
 
-        public TourPriceController(HttpClient httpClient, IConfiguration configuration)
+        public TourPriceController(ITourPriceApiService tourPriceApiService, ILookupApiService lookupApiService, ITourApiService tourApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _tourPriceApiService = tourPriceApiService;
+            _lookupApiService = lookupApiService;
+            _tourApiService = tourApiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}TourPrice");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entities = JsonSerializer.Deserialize<List<TourPriceDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entities);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return View(new List<TourPriceDto>());
-        }
-
-        public async Task<IActionResult> Details(int id)
-        {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}TourPrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<TourPriceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return NotFound();
+            var entities = await _tourPriceApiService.GetAllTourPricesAsync() ?? new List<TourPriceDto>();
+            return View(entities);
         }
 
         public async Task<IActionResult> Create()
         {
-            try
-            {
-                var toursResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Tour");
-                if (toursResponse.IsSuccessStatusCode)
-                {
-                    var toursContent = await toursResponse.Content.ReadAsStringAsync();
-                    var tours = JsonSerializer.Deserialize<List<TourDto>>(toursContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    ViewBag.TourId = tours?.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = $"{t.Code} - {t.Name}" }).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Tur listesi yüklenirken hata oluştu: {ex.Message}");
-            }
+            await LoadLookupData();
             return View();
         }
 
@@ -80,50 +37,35 @@ namespace SD_Turizm.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                var result = await _tourPriceApiService.CreateTourPriceAsync(entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync($"{_apiBaseUrl}TourPrice", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Tur fiyatı oluşturulurken hata oluştu.");
+            }
+            return View(entity);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var entity = await _tourPriceApiService.GetTourPriceByIdAsync(id);
+            if (entity == null)
+            {
+                return NotFound();
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            try
+            var entity = await _tourPriceApiService.GetTourPriceByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}TourPrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<TourPriceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    var toursResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Tour");
-                    if (toursResponse.IsSuccessStatusCode)
-                    {
-                        var toursContent = await toursResponse.Content.ReadAsStringAsync();
-                        var tours = JsonSerializer.Deserialize<List<TourDto>>(toursContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        ViewBag.TourId = tours?.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = $"{t.Code} - {t.Name}" }).ToList();
-                    }
-                    
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return NotFound();
+            await LoadLookupData();
+            return View(entity);
         }
 
         [HttpPost]
@@ -137,60 +79,48 @@ namespace SD_Turizm.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                var result = await _tourPriceApiService.UpdateTourPriceAsync(id, entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PutAsync($"{_apiBaseUrl}TourPrice/{id}", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Tur fiyatı güncellenirken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var entity = await _tourPriceApiService.GetTourPriceByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}TourPrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<TourPriceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return NotFound();
+            return View(entity);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
+            var result = await _tourPriceApiService.DeleteTourPriceAsync(id);
+            if (result)
             {
-                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}TourPrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError("", "Tur fiyatı silinirken hata oluştu.");
+            return View();
+        }
+
+        private async Task LoadLookupData()
+        {
+            // Load Tours
+            var tours = await _tourApiService.GetAllToursAsync() ?? new List<TourDto>();
+            ViewBag.TourId = tours.Select(t => new { Value = t.Id, Text = t.Name }).ToList();
+
+            // Load Currencies
+            var currencies = await _lookupApiService.GetCurrenciesAsync() ?? new List<dynamic>();
+            ViewBag.Currencies = currencies;
         }
     }
-} 
+}

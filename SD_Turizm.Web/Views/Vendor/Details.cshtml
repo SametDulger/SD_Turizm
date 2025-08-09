@@ -1,0 +1,88 @@
+@model SD_Turizm.Web.Models.DTOs.VendorDto
+
+@{
+    ViewData["Title"] = "Tedarikçi Detayları";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-gradient-info rounded-circle p-3 me-3 shadow-sm">
+                <i class="fas fa-eye fa-2x text-white"></i>
+            </div>
+            <div>
+                <h1 class="h2 mb-0 text-dark fw-bold">Tedarikçi Detayları</h1>
+                <p class="text-muted mb-0">@Model.Name</p>
+            </div>
+        </div>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-lg shadow-sm me-2">
+                <i class="fas fa-edit me-2"></i>Düzenle
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-info text-white">
+            <h6 class="m-0 fw-bold">
+                <i class="fas fa-info-circle me-2"></i>Tedarikçi Bilgileri
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4 fw-bold">ID:</dt>
+                        <dd class="col-sm-8">@Model.Id</dd>
+
+                        <dt class="col-sm-4 fw-bold">Tedarikçi Adı:</dt>
+                        <dd class="col-sm-8">@Model.Name</dd>
+
+                        <dt class="col-sm-4 fw-bold">Kod:</dt>
+                        <dd class="col-sm-8">@Model.Code</dd>
+
+                        <dt class="col-sm-4 fw-bold">Tür:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-info">@Model.Type</span>
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">Ülke:</dt>
+                        <dd class="col-sm-8">@Model.Country</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4 fw-bold">Telefon:</dt>
+                        <dd class="col-sm-8">@Model.Phone</dd>
+
+                        <dt class="col-sm-4 fw-bold">E-posta:</dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4 fw-bold">Durum:</dt>
+                        <dd class="col-sm-8">
+                                                                    <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger")">
+                                            @(Model.IsActive ? "Aktif" : "Pasif")
+                                        </span>
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">Adres:</dt>
+                        <dd class="col-sm-8">@Model.Address</dd>
+                    </dl>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <dt class="fw-bold">Açıklama:</dt>
+                        <dd>@Model.Description</dd>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

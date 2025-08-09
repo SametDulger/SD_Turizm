@@ -1,38 +1,35 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SD_Turizm.Web.Models.DTOs;
-using System.Text;
-using System.Text.Json;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class TourController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly ITourApiService _tourApiService;
+        private readonly ILookupApiService _lookupApiService;
 
-        public TourController(HttpClient httpClient, IConfiguration configuration)
+        public TourController(ITourApiService tourApiService, ILookupApiService lookupApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _tourApiService = tourApiService;
+            _lookupApiService = lookupApiService;
         }
 
         public async Task<IActionResult> Index()
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Tour");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entities = JsonSerializer.Deserialize<List<TourDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entities);
-                }
+                var entities = await _tourApiService.GetAllToursAsync();
+                await LoadLookupData();
+                return View(entities);
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
+                return View(new List<TourDto>());
             }
-            return View(new List<TourDto>());
         }
 
         public IActionResult Create()
@@ -48,10 +45,8 @@ namespace SD_Turizm.Web.Controllers
             {
                 try
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync($"{_apiBaseUrl}Tour", content);
-                    if (response.IsSuccessStatusCode)
+                    var result = await _tourApiService.CreateTourAsync(entity);
+                    if (result != null)
                     {
                         return RedirectToAction(nameof(Index));
                     }
@@ -68,11 +63,9 @@ namespace SD_Turizm.Web.Controllers
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Tour/{id}");
-                if (response.IsSuccessStatusCode)
+                var entity = await _tourApiService.GetTourByIdAsync(id);
+                if (entity != null)
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<TourDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return View(entity);
                 }
             }
@@ -87,11 +80,9 @@ namespace SD_Turizm.Web.Controllers
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Tour/{id}");
-                if (response.IsSuccessStatusCode)
+                var entity = await _tourApiService.GetTourByIdAsync(id);
+                if (entity != null)
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<TourDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return View(entity);
                 }
             }
@@ -106,14 +97,17 @@ namespace SD_Turizm.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, TourDto entity)
         {
+            if (id != entity.Id)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PutAsync($"{_apiBaseUrl}Tour/{id}", content);
-                    if (response.IsSuccessStatusCode)
+                    var result = await _tourApiService.UpdateTourAsync(id, entity);
+                    if (result != null)
                     {
                         return RedirectToAction(nameof(Index));
                     }
@@ -130,11 +124,9 @@ namespace SD_Turizm.Web.Controllers
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Tour/{id}");
-                if (response.IsSuccessStatusCode)
+                var entity = await _tourApiService.GetTourByIdAsync(id);
+                if (entity != null)
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<TourDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return View(entity);
                 }
             }
@@ -151,8 +143,8 @@ namespace SD_Turizm.Web.Controllers
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}Tour/{id}");
-                if (response.IsSuccessStatusCode)
+                var result = await _tourApiService.DeleteTourAsync(id);
+                if (result)
                 {
                     return RedirectToAction(nameof(Index));
                 }
@@ -161,7 +153,12 @@ namespace SD_Turizm.Web.Controllers
             {
                 ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Delete), new { id });
+        }
+
+        private async Task LoadLookupData()
+        {
+            // Basic lookup data if needed for tour forms
         }
     }
 } 

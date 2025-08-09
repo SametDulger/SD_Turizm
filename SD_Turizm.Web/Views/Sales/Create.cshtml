@@ -80,9 +80,15 @@
                             </label>
                             <select asp-for="Currency" class="form-select" required>
                                 <option value="">Para Birimi Seçin</option>
-                                <option value="EUR">EUR</option>
-                                <option value="USD">USD</option>
-                                <option value="TRY">TRY</option>
+                                @if (ViewBag.Currencies != null)
+                                {
+                                    @foreach (var currency in ViewBag.Currencies)
+                                    {
+                                        <option value="@currency.GetProperty("code").GetString()">
+                                            @currency.GetProperty("flag").GetString() @currency.GetProperty("code").GetString() - @currency.GetProperty("name").GetString()
+                                        </option>
+                                    }
+                                }
                             </select>
                             <span asp-validation-for="Currency" class="text-danger"></span>
                         </div>
@@ -94,10 +100,13 @@
                             </label>
                             <select asp-for="Status" class="form-select" required>
                                 <option value="">Durum Seçin</option>
-                                <option value="Pending">Beklemede</option>
-                                <option value="Confirmed">Onaylandı</option>
-                                <option value="Cancelled">İptal Edildi</option>
-                                <option value="Completed">Tamamlandı</option>
+                                @if (ViewBag.SaleStatuses != null)
+                                {
+                                    @foreach (var status in ViewBag.SaleStatuses)
+                                    {
+                                        <option value="@status.GetProperty("code").GetString()">@status.GetProperty("name").GetString()</option>
+                                    }
+                                }
                             </select>
                             <span asp-validation-for="Status" class="text-danger"></span>
                         </div>

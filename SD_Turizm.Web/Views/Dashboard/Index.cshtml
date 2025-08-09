@@ -1,0 +1,281 @@
+@model SD_Turizm.Web.Controllers.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+    .dashboard-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        color: white;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+        min-height: 100px;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .dashboard-card-icon {
+        font-size: 1.8rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .dashboard-card-title {
+        font-size: 0.8rem;
+        opacity: 0.9;
+        margin-bottom: 0.25rem;
+    }
+
+    .dashboard-card-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 0.75rem;
+        height: 560px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chart-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .chart-container canvas {
+        flex: 1;
+        width: 100% !important;
+        max-width: 100%;
+        height: 400px !important;
+        object-fit: contain;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1 class="h4 mb-2">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </h1>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="dashboard-card">
+                <div class="dashboard-card-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="dashboard-card-title">Toplam Satış</div>
+                <div class="dashboard-card-value">@Model.TotalSales</div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="dashboard-card">
+                <div class="dashboard-card-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="dashboard-card-title">Toplam Gelir</div>
+                <div class="dashboard-card-value">@Model.TotalRevenue.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="dashboard-card">
+                <div class="dashboard-card-icon">
+                    <i class="fas fa-hotel"></i>
+                </div>
+                <div class="dashboard-card-title">Toplam Otel</div>
+                <div class="dashboard-card-value">@Model.TotalHotels</div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="dashboard-card">
+                <div class="dashboard-card-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <div class="dashboard-card-title">Toplam Tur</div>
+                <div class="dashboard-card-value">@Model.TotalTours</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <div class="col-xl-9 col-lg-8">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-chart-line"></i> Satış Grafiği
+                </div>
+                <canvas id="salesChart" width="1200" height="400"></canvas>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-lg-4">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-chart-pie"></i> Vendor İstatistikleri
+                </div>
+                <canvas id="vendorChart" width="350" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row">
+        <div class="col-12">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-clock"></i> Son Aktiviteler
+                </div>
+                <div id="recentActivities">
+                    <p class="text-muted">Aktiviteler yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Sales Chart
+            loadSalesChart();
+            // Vendor Stats Chart
+            loadVendorChart();
+            // Recent Activities
+            loadRecentActivities();
+        });
+
+        function loadSalesChart() {
+            $.get('@Url.Action("SalesChart", "Dashboard")', function(data) {
+                const ctx = document.getElementById('salesChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(item => item.label),
+                        datasets: [{
+                            label: 'Satış',
+                            data: data.map(item => item.value),
+                            borderColor: 'rgb(102, 126, 234)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }).fail(function() {
+                $('#salesChart').parent().html('<p class="text-muted">Grafik yüklenemedi.</p>');
+            });
+        }
+
+        function loadVendorChart() {
+            $.get('@Url.Action("VendorStats", "Dashboard")', function(data) {
+                const ctx = document.getElementById('vendorChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(item => item.vendorName),
+                        datasets: [{
+                            data: data.map(item => item.totalSales),
+                            backgroundColor: [
+                                '#667eea', '#764ba2', '#f093fb', '#f5576c',
+                                '#4facfe', '#00f2fe', '#a8edea', '#fed6e3'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    padding: 8
+                                }
+                            }
+                        }
+                    }
+                });
+            }).fail(function() {
+                $('#vendorChart').parent().html('<p class="text-muted">Grafik yüklenemedi.</p>');
+            });
+        }
+
+        function loadRecentActivities() {
+            // API'den gerçek aktivite verilerini çek
+            $.get('@Url.Action("GetRecentActivities", "Dashboard")', function(data) {
+                let html = '<div class="list-group list-group-flush">';
+                
+                if (data && data.length > 0) {
+                    data.forEach(activity => {
+                        const activityDate = new Date(activity.timestamp);
+                        html += `
+                            <div class="list-group-item border-0 px-0">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="badge bg-${activity.type === 'success' ? 'success' : activity.type === 'info' ? 'primary' : 'warning'}">
+                                            <i class="fas fa-${activity.type === 'success' ? 'check' : activity.type === 'info' ? 'info' : 'exclamation'}"></i>
+                                        </span>
+                                    </div>
+                                    <div class="col">
+                                        <strong>${activity.activity}</strong><br>
+                                        <small class="text-muted">Kullanıcı: ${activity.user} - ${activityDate.toLocaleString('tr-TR')}</small>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                } else {
+                    html += '<div class="text-center py-3"><p class="text-muted">Henüz aktivite bulunmuyor.</p></div>';
+                }
+                
+                html += '</div>';
+                $('#recentActivities').html(html);
+            }).fail(function() {
+                $('#recentActivities').html('<div class="text-center py-3"><p class="text-muted text-danger">Aktiviteler yüklenemedi.</p></div>');
+            });
+        }
+    </script>
+}

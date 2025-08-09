@@ -188,13 +188,13 @@
                                 <label class="form-label">Satıcı Tipi</label>
                                 <select class="form-select" name="sellerType">
                                     <option value="">Tümü</option>
-                                    <option value="Otel">Otel</option>
-                                    <option value="Tur">Tur</option>
-                                    <option value="Transfer">Transfer</option>
-                                    <option value="RentACar">Rent A Car</option>
-                                    <option value="Rehber">Rehber</option>
-                                    <option value="Uçak">Uçak</option>
-                                    <option value="Gemi">Gemi</option>
+                                    @if (ViewBag.ProductTypes != null)
+                                    {
+                                        @foreach (var productType in ViewBag.ProductTypes)
+                                        {
+                                            <option value="@productType.GetProperty("code").GetString()">@productType.GetProperty("name").GetString()</option>
+                                        }
+                                    }
                                 </select>
                             </div>
                         </div>
@@ -203,9 +203,15 @@
                                 <label class="form-label">Para Birimi</label>
                                 <select class="form-select" name="currency">
                                     <option value="">Tümü</option>
-                                    <option value="TRY">TRY</option>
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
+                                    @if (ViewBag.Currencies != null)
+                                    {
+                                        @foreach (var currency in ViewBag.Currencies)
+                                        {
+                                            <option value="@currency.GetProperty("code").GetString()">
+                                                @currency.GetProperty("flag").GetString() @currency.GetProperty("code").GetString() - @currency.GetProperty("name").GetString()
+                                            </option>
+                                        }
+                                    }
                                 </select>
                             </div>
                         </div>
@@ -255,7 +261,7 @@
         $(document).ready(function() {
             $('#salesTable').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
                 },
                 pageLength: 25,
                 order: [[7, 'desc']]

@@ -65,11 +65,11 @@
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label asp-for="StartDate" class="form-label">
-                                <i class="fas fa-calendar me-1"></i>Başlangıç Tarihi
+                            <label asp-for="Duration" class="form-label">
+                                <i class="fas fa-clock me-1"></i>Süre
                             </label>
-                            <input asp-for="StartDate" type="date" class="form-control" />
-                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                            <input asp-for="Duration" class="form-control" placeholder="Örn: 1 Gün, 2 Gün" />
+                            <span asp-validation-for="Duration" class="text-danger"></span>
                         </div>
                     </div>
                 </div>
@@ -77,13 +77,25 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label asp-for="EndDate" class="form-label">
-                                <i class="fas fa-calendar me-1"></i>Bitiş Tarihi
+                            <label asp-for="Region" class="form-label">
+                                <i class="fas fa-map-marker-alt me-1"></i>Bölge
                             </label>
-                            <input asp-for="EndDate" type="date" class="form-control" />
-                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                            <input asp-for="Region" class="form-control" placeholder="Örn: İstanbul, Kapadokya" />
+                            <span asp-validation-for="Region" class="text-danger"></span>
                         </div>
                     </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="VehicleType" class="form-label">
+                                <i class="fas fa-bus me-1"></i>Araç Türü
+                            </label>
+                            <input asp-for="VehicleType" class="form-control" placeholder="Örn: Otobüs, Minibüs" />
+                            <span asp-validation-for="VehicleType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <div class="form-check">

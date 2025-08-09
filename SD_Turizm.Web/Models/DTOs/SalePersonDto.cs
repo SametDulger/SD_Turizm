@@ -8,8 +8,9 @@ namespace SD_Turizm.Web.Models.DTOs
         public string LastName { get; set; } = string.Empty;
         public string PersonType { get; set; } = string.Empty;
         public int Age { get; set; }
-        public string Nationality { get; set; } = string.Empty;
+        public string? Nationality { get; set; }
         public DateTime? BirthDate { get; set; }
-        public string PassportNumber { get; set; } = string.Empty;
+        public string? PassportNumber { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 } 

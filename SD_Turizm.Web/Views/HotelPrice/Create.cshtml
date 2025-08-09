@@ -43,11 +43,13 @@
                         <label asp-for="RoomType" class="form-label"><i class="fas fa-bed"></i> Oda Tipi</label>
                         <select asp-for="RoomType" class="form-select" required>
                             <option value="">Oda Tipi Seçin</option>
-                            <option value="SGL">Tek Kişilik</option>
-                            <option value="DBL">Çift Kişilik</option>
-                            <option value="TRP">Üç Kişilik</option>
-                            <option value="DBL+1">Çift Kişilik + 1</option>
-                            <option value="TRP+1">Üç Kişilik + 1</option>
+                            @if(ViewBag.RoomTypes != null)
+                            {
+                                @foreach (var roomType in ViewBag.RoomTypes)
+                                {
+                                    <option value="@roomType.GetProperty("code").GetString()">@roomType.GetProperty("name").GetString()</option>
+                                }
+                            }
                         </select>
                         <span asp-validation-for="RoomType" class="text-danger small"></span>
                     </div>
@@ -58,9 +60,13 @@
                         <label asp-for="RoomLocation" class="form-label"><i class="fas fa-map-marker-alt"></i> Oda Konumu</label>
                         <select asp-for="RoomLocation" class="form-select" required>
                             <option value="">Oda Konumu Seçin</option>
-                            <option value="DNZ">Deniz Manzaralı</option>
-                            <option value="GNL">Genel</option>
-                            <option value="PRK">Park Manzaralı</option>
+                            @if (ViewBag.RoomLocations != null)
+                            {
+                                @foreach (var roomLocation in ViewBag.RoomLocations)
+                                {
+                                    <option value="@roomLocation.GetProperty("code").GetString()">@roomLocation.GetProperty("name").GetString()</option>
+                                }
+                            }
                         </select>
                         <span asp-validation-for="RoomLocation" class="text-danger small"></span>
                     </div>
@@ -69,12 +75,13 @@
                         <label asp-for="BoardType" class="form-label"><i class="fas fa-utensils"></i> Pansiyon Tipi</label>
                         <select asp-for="BoardType" class="form-select" required>
                             <option value="">Pansiyon Tipi Seçin</option>
-                            <option value="OB">Oda Kahvaltı</option>
-                            <option value="BB">Yarım Pansiyon</option>
-                            <option value="HB">Tam Pansiyon</option>
-                            <option value="FB">Ultra Her Şey Dahil</option>
-                            <option value="AI">Her Şey Dahil</option>
-                            <option value="UAI">Ultra Her Şey Dahil</option>
+                            @if (ViewBag.BoardTypes != null)
+                            {
+                                @foreach (var boardType in ViewBag.BoardTypes)
+                                {
+                                    <option value="@boardType.GetProperty("code").GetString()">@boardType.GetProperty("name").GetString()</option>
+                                }
+                            }
                         </select>
                         <span asp-validation-for="BoardType" class="text-danger small"></span>
                     </div>
@@ -105,9 +112,15 @@
                         <label asp-for="Currency" class="form-label"><i class="fas fa-money-bill-wave"></i> Para Birimi</label>
                         <select asp-for="Currency" class="form-select" required>
                             <option value="">Para Birimi Seçin</option>
-                            <option value="EUR">EUR</option>
-                            <option value="USD">USD</option>
-                            <option value="TRY">TRY</option>
+                            @if (ViewBag.Currencies != null)
+                            {
+                                @foreach (var currency in ViewBag.Currencies)
+                                {
+                                    <option value="@currency.GetProperty("code").GetString()">
+                                        @currency.GetProperty("flag").GetString() @currency.GetProperty("code").GetString() - @currency.GetProperty("name").GetString()
+                                    </option>
+                                }
+                            }
                         </select>
                         <span asp-validation-for="Currency" class="text-danger small"></span>
                     </div>

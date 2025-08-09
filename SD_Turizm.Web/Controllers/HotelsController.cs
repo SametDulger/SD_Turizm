@@ -1,32 +1,34 @@
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SD_Turizm.Web.Models.DTOs;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class HotelsController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly IHotelApiService _hotelApiService;
+        private readonly ILookupApiService _lookupApiService;
 
-        public HotelsController(HttpClient httpClient, IConfiguration configuration)
+        public HotelsController(IHotelApiService hotelApiService, ILookupApiService lookupApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _hotelApiService = hotelApiService;
+            _lookupApiService = lookupApiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var hotels = await _httpClient.GetFromJsonAsync<List<HotelDto>>($"{_apiBaseUrl}Hotels");
+            var hotels = await _hotelApiService.GetAllHotelsAsync();
+            await LoadLookupData();
             return View(hotels);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var hotel = await _httpClient.GetFromJsonAsync<HotelDto>($"{_apiBaseUrl}Hotels/{id}");
+            var hotel = await _hotelApiService.GetHotelByIdAsync(id);
             if (hotel == null)
             {
                 return NotFound();
@@ -45,8 +47,8 @@ namespace SD_Turizm.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var response = await _httpClient.PostAsJsonAsync($"{_apiBaseUrl}Hotels", hotel);
-                if (response.IsSuccessStatusCode)
+                var result = await _hotelApiService.CreateHotelAsync(hotel);
+                if (result != null)
                 {
                     return RedirectToAction(nameof(Index));
                 }
@@ -57,7 +59,7 @@ namespace SD_Turizm.Web.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var hotel = await _httpClient.GetFromJsonAsync<HotelDto>($"{_apiBaseUrl}Hotels/{id}");
+            var hotel = await _hotelApiService.GetHotelByIdAsync(id);
             if (hotel == null)
             {
                 return NotFound();
@@ -76,8 +78,8 @@ namespace SD_Turizm.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                var response = await _httpClient.PutAsJsonAsync($"{_apiBaseUrl}Hotels/{id}", hotel);
-                if (response.IsSuccessStatusCode)
+                var result = await _hotelApiService.UpdateHotelAsync(id, hotel);
+                if (result != null)
                 {
                     return RedirectToAction(nameof(Index));
                 }
@@ -88,7 +90,7 @@ namespace SD_Turizm.Web.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var hotel = await _httpClient.GetFromJsonAsync<HotelDto>($"{_apiBaseUrl}Hotels/{id}");
+            var hotel = await _hotelApiService.GetHotelByIdAsync(id);
             if (hotel == null)
             {
                 return NotFound();
@@ -100,12 +102,18 @@ namespace SD_Turizm.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}Hotels/{id}");
-            if (response.IsSuccessStatusCode)
+            var result = await _hotelApiService.DeleteHotelAsync(id);
+            if (result)
             {
                 return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError("", "Error deleting hotel");
+            return View();
+        }
+
+        private async Task LoadLookupData()
+        {
+            // Basic lookup data if needed for hotel forms
         }
     }
 } 

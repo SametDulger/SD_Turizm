@@ -1,57 +1,34 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using SD_Turizm.Web.Models.DTOs;
-using System.Text;
-using System.Text.Json;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class SaleItemController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly ISaleItemApiService _saleItemApiService;
+        private readonly ILookupApiService _lookupApiService;
+        private readonly ISaleApiService _saleApiService;
 
-        public SaleItemController(HttpClient httpClient, IConfiguration configuration)
+        public SaleItemController(ISaleItemApiService saleItemApiService, ILookupApiService lookupApiService, ISaleApiService saleApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _saleItemApiService = saleItemApiService;
+            _lookupApiService = lookupApiService;
+            _saleApiService = saleApiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}SaleItem");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entities = JsonSerializer.Deserialize<List<SaleItemDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entities);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return View(new List<SaleItemDto>());
+            var entities = await _saleItemApiService.GetAllSaleItemsAsync() ?? new List<SaleItemDto>();
+            await LoadLookupData();
+            return View(entities);
         }
 
         public async Task<IActionResult> Create()
         {
-            try
-            {
-                var salesResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Sales");
-                if (salesResponse.IsSuccessStatusCode)
-                {
-                    var salesContent = await salesResponse.Content.ReadAsStringAsync();
-                    var sales = JsonSerializer.Deserialize<List<SaleDto>>(salesContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    ViewBag.Sales = sales?.Select(s => new SelectListItem { Value = s.Id.ToString(), Text = $"{s.SaleNumber} - {s.CustomerName}" }).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Satış listesi yüklenirken hata oluştu: {ex.Message}");
-            }
+            await LoadLookupData();
             return View();
         }
 
@@ -61,131 +38,94 @@ namespace SD_Turizm.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                var result = await _saleItemApiService.CreateSaleItemAsync(entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync($"{_apiBaseUrl}SaleItem", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Satış öğesi oluşturulurken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            try
+            var entity = await _saleItemApiService.GetSaleItemByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}SaleItem/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<SaleItemDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            try
+            var entity = await _saleItemApiService.GetSaleItemByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}SaleItem/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<SaleItemDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    var salesResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Sales");
-                    if (salesResponse.IsSuccessStatusCode)
-                    {
-                        var salesContent = await salesResponse.Content.ReadAsStringAsync();
-                        var sales = JsonSerializer.Deserialize<List<SaleDto>>(salesContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        ViewBag.Sales = sales?.Select(s => new SelectListItem { Value = s.Id.ToString(), Text = $"{s.SaleNumber} - {s.CustomerName}" }).ToList();
-                    }
-                    
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            await LoadLookupData();
+            return View(entity);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, SaleItemDto entity)
         {
+            if (id != entity.Id)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                try
+                var result = await _saleItemApiService.UpdateSaleItemAsync(id, entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PutAsync($"{_apiBaseUrl}SaleItem/{id}", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Satış öğesi güncellenirken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var entity = await _saleItemApiService.GetSaleItemByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}SaleItem/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<SaleItemDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
+            var result = await _saleItemApiService.DeleteSaleItemAsync(id);
+            if (result)
             {
-                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}SaleItem/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError("", "Satış öğesi silinirken hata oluştu.");
+            return View();
+        }
+
+        private async Task LoadLookupData()
+        {
+            // Load Sales
+            var sales = await _saleApiService.GetAllSalesAsync() ?? new List<SaleDto>();
+            ViewBag.SaleId = sales.Select(s => new { Value = s.Id, Text = s.PNRNumber }).ToList();
+
+            // Load Vendor Types
+            var vendorTypes = await _lookupApiService.GetVendorTypesAsync() ?? new List<dynamic>();
+            ViewBag.VendorTypes = vendorTypes;
+
+            // Load Currencies
+            var currencies = await _lookupApiService.GetCurrenciesAsync() ?? new List<dynamic>();
+            ViewBag.Currencies = currencies;
         }
     }
-} 
+}

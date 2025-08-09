@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SD_Turizm.Core.Entities;
+using SD_Turizm.Core.DTOs;
 
 namespace SD_Turizm.Application.Services
 {
@@ -14,5 +15,11 @@ namespace SD_Turizm.Application.Services
         Task DeleteTourOperatorAsync(int id);
         Task<bool> TourOperatorExistsAsync(int id);
         Task<bool> TourOperatorCodeExistsAsync(string code);
+        
+        // V2 Methods
+        Task<PagedResult<TourOperator>> GetTourOperatorsWithPaginationAsync(PaginationDto pagination, string? searchTerm = null, string? region = null, bool? isActive = null);
+        Task<PagedResult<TourOperator>> SearchTourOperatorsAsync(PaginationDto pagination, string region, string? serviceType = null);
+        Task<object> GetTourOperatorStatisticsAsync();
+        Task<int> BulkUpdateAsync(List<TourOperator> tourOperators);
     }
 } 

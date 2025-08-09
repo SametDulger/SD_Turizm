@@ -1,57 +1,34 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using SD_Turizm.Web.Models.DTOs;
-using System.Text;
-using System.Text.Json;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class PackageItemController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly IPackageItemApiService _packageItemApiService;
+        private readonly ILookupApiService _lookupApiService;
+        private readonly IPackageApiService _packageApiService;
 
-        public PackageItemController(HttpClient httpClient, IConfiguration configuration)
+        public PackageItemController(IPackageItemApiService packageItemApiService, ILookupApiService lookupApiService, IPackageApiService packageApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _packageItemApiService = packageItemApiService;
+            _lookupApiService = lookupApiService;
+            _packageApiService = packageApiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}PackageItem");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entities = JsonSerializer.Deserialize<List<PackageItemDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entities);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return View(new List<PackageItemDto>());
+            var entities = await _packageItemApiService.GetAllPackageItemsAsync() ?? new List<PackageItemDto>();
+            await LoadLookupData();
+            return View(entities);
         }
 
         public async Task<IActionResult> Create()
         {
-            try
-            {
-                var packagesResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Package");
-                if (packagesResponse.IsSuccessStatusCode)
-                {
-                    var packagesContent = await packagesResponse.Content.ReadAsStringAsync();
-                    var packages = JsonSerializer.Deserialize<List<PackageDto>>(packagesContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    ViewBag.PackageId = packages?.Select(p => new SelectListItem { Value = p.Id.ToString(), Text = $"{p.Code} - {p.Name}" }).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Paket listesi yüklenirken hata oluştu: {ex.Message}");
-            }
+            await LoadLookupData();
             return View();
         }
 
@@ -61,131 +38,94 @@ namespace SD_Turizm.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                var result = await _packageItemApiService.CreatePackageItemAsync(entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync($"{_apiBaseUrl}PackageItem", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Paket öğesi oluşturulurken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            try
+            var entity = await _packageItemApiService.GetPackageItemByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}PackageItem/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<PackageItemDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            try
+            var entity = await _packageItemApiService.GetPackageItemByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}PackageItem/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<PackageItemDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    var packagesResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Package");
-                    if (packagesResponse.IsSuccessStatusCode)
-                    {
-                        var packagesContent = await packagesResponse.Content.ReadAsStringAsync();
-                        var packages = JsonSerializer.Deserialize<List<PackageDto>>(packagesContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        ViewBag.PackageId = packages?.Select(p => new SelectListItem { Value = p.Id.ToString(), Text = $"{p.Code} - {p.Name}" }).ToList();
-                    }
-                    
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            await LoadLookupData();
+            return View(entity);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, PackageItemDto entity)
         {
+            if (id != entity.Id)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                try
+                var result = await _packageItemApiService.UpdatePackageItemAsync(id, entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PutAsync($"{_apiBaseUrl}PackageItem/{id}", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Paket öğesi güncellenirken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var entity = await _packageItemApiService.GetPackageItemByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}PackageItem/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<PackageItemDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
+            var result = await _packageItemApiService.DeletePackageItemAsync(id);
+            if (result)
             {
-                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}PackageItem/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError("", "Paket öğesi silinirken hata oluştu.");
+            return View();
+        }
+
+        private async Task LoadLookupData()
+        {
+            // Load Packages
+            var packages = await _packageApiService.GetAllPackagesAsync() ?? new List<PackageDto>();
+            ViewBag.PackageId = packages.Select(p => new { Value = p.Id, Text = p.Name }).ToList();
+
+            // Load Vendor Types
+            var vendorTypes = await _lookupApiService.GetVendorTypesAsync() ?? new List<dynamic>();
+            ViewBag.VendorTypes = vendorTypes;
+
+            // Load Currencies
+            var currencies = await _lookupApiService.GetCurrenciesAsync() ?? new List<dynamic>();
+            ViewBag.Currencies = currencies;
         }
     }
-} 
+}

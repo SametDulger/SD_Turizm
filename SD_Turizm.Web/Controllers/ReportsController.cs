@@ -1,225 +1,107 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using SD_Turizm.Web.Models.DTOs;
+using SD_Turizm.Web.Services;
+using System.Text.Json;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class ReportsController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly IReportsApiService _reportsApiService;
+        private readonly ILookupApiService _lookupApiService;
 
-        public ReportsController(HttpClient httpClient, IConfiguration configuration)
+        public ReportsController(IReportsApiService reportsApiService, ILookupApiService lookupApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _reportsApiService = reportsApiService;
+            _lookupApiService = lookupApiService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Dashboard/statistics");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var statistics = JsonSerializer.Deserialize<dynamic>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    ViewBag.MonthlySales = statistics?.GetProperty("TotalSales")?.GetDecimal();
-                    ViewBag.WeeklySales = statistics?.GetProperty("TotalSales")?.GetDecimal() * 0.25m; // Haftalık tahmin
-                    ViewBag.TotalCustomers = statistics?.GetProperty("TotalCustomers")?.GetInt32();
-                    ViewBag.ActivePackages = 0; // API'de henüz paket sayısı yok
-                }
-                else
-                {
-                    ViewBag.MonthlySales = 0;
-                    ViewBag.WeeklySales = 0;
-                    ViewBag.TotalCustomers = 0;
-                    ViewBag.ActivePackages = 0;
-                }
-            }
-            catch (Exception)
-            {
-                ViewBag.MonthlySales = 0;
-                ViewBag.WeeklySales = 0;
-                ViewBag.TotalCustomers = 0;
-                ViewBag.ActivePackages = 0;
-            }
-
             return View();
         }
 
-        public async Task<IActionResult> SalesReport(DateTime? startDate = null, DateTime? endDate = null, string? sellerType = null, string? currency = null, string? pnrNumber = null, string? fileCode = null, string? agencyCode = null, string? cariCode = null)
+        public async Task<IActionResult> CustomerReport()
         {
-            try
-            {
-                var start = startDate ?? DateTime.Today.AddDays(-30);
-                var end = endDate ?? DateTime.Today;
-
-                var queryParams = new List<string>
-                {
-                    $"startDate={start:yyyy-MM-dd}",
-                    $"endDate={end:yyyy-MM-dd}"
-                };
-
-                if (!string.IsNullOrEmpty(sellerType))
-                    queryParams.Add($"sellerType={sellerType}");
-                if (!string.IsNullOrEmpty(currency))
-                    queryParams.Add($"currency={currency}");
-                if (!string.IsNullOrEmpty(pnrNumber))
-                    queryParams.Add($"pnrNumber={pnrNumber}");
-                if (!string.IsNullOrEmpty(fileCode))
-                    queryParams.Add($"fileCode={fileCode}");
-                if (!string.IsNullOrEmpty(agencyCode))
-                    queryParams.Add($"agencyCode={agencyCode}");
-                if (!string.IsNullOrEmpty(cariCode))
-                    queryParams.Add($"cariCode={cariCode}");
-
-                var queryString = string.Join("&", queryParams);
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Reports/sales?{queryString}");
-                var summaryResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Reports/sales/summary?{queryString}");
-
-                if (response.IsSuccessStatusCode && summaryResponse.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var summaryContent = await summaryResponse.Content.ReadAsStringAsync();
-                    
-                    var sales = JsonSerializer.Deserialize<List<SalesReportDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    var summary = JsonSerializer.Deserialize<SalesSummaryDto>(summaryContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                    ViewBag.Sales = sales;
-                    ViewBag.Summary = summary;
-                    ViewBag.StartDate = start;
-                    ViewBag.EndDate = end;
-                    ViewBag.Filters = new { sellerType, currency, pnrNumber, fileCode, agencyCode, cariCode };
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-
-            return View();
+            await LoadLookupData();
+            var report = await _reportsApiService.GetCustomerReportDataAsync() ?? new { };
+            return View(report);
         }
 
-        public async Task<IActionResult> FinancialReport(DateTime? startDate = null, DateTime? endDate = null, string currency = "TRY")
+        public async Task<IActionResult> FinancialReport()
         {
-            try
-            {
-                var start = startDate ?? DateTime.Today.AddDays(-30);
-                var end = endDate ?? DateTime.Today;
-
-                var queryString = $"startDate={start:yyyy-MM-dd}&endDate={end:yyyy-MM-dd}&currency={currency}";
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Reports/financial?{queryString}");
-                var summaryResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Reports/financial/summary?{queryString}");
-
-                if (response.IsSuccessStatusCode && summaryResponse.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var summaryContent = await summaryResponse.Content.ReadAsStringAsync();
-                    
-                    var sales = JsonSerializer.Deserialize<List<FinancialReportDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    var summary = JsonSerializer.Deserialize<FinancialSummaryDto>(summaryContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                    ViewBag.Sales = sales;
-                    ViewBag.Summary = summary;
-                    ViewBag.StartDate = start;
-                    ViewBag.EndDate = end;
-                    ViewBag.Currency = currency;
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-
-            return View();
+            await LoadLookupData();
+            var report = await _reportsApiService.GetFinancialReportDataAsync() ?? new { };
+            return View(report);
         }
 
-        public async Task<IActionResult> CustomerReport(DateTime? startDate = null, DateTime? endDate = null, string? cariCode = null)
+        public async Task<IActionResult> SalesReport()
         {
-            try
-            {
-                var start = startDate ?? DateTime.Today.AddDays(-30);
-                var end = endDate ?? DateTime.Today;
-
-                var queryParams = new List<string>
-                {
-                    $"startDate={start:yyyy-MM-dd}",
-                    $"endDate={end:yyyy-MM-dd}"
-                };
-
-                if (!string.IsNullOrEmpty(cariCode))
-                    queryParams.Add($"cariCode={cariCode}");
-
-                var queryString = string.Join("&", queryParams);
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Reports/customers?{queryString}");
-                var summaryResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Reports/customers/summary?{queryString}");
-
-                if (response.IsSuccessStatusCode && summaryResponse.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var summaryContent = await summaryResponse.Content.ReadAsStringAsync();
-                    
-                    var sales = JsonSerializer.Deserialize<List<CustomerReportDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    var summary = JsonSerializer.Deserialize<CustomerSummaryDto>(summaryContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                    ViewBag.Sales = sales;
-                    ViewBag.Summary = summary;
-                    ViewBag.StartDate = start;
-                    ViewBag.EndDate = end;
-                    ViewBag.CariCode = cariCode;
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-
-            return View();
+            await LoadLookupData();
+            var report = await _reportsApiService.GetSalesReportDataAsync() ?? new { };
+            return View(report);
         }
 
-        public async Task<IActionResult> ProductReport(DateTime? startDate = null, DateTime? endDate = null, string? productType = null)
+        [HttpPost]
+        public async Task<IActionResult> ExportCustomerReport(string format = "pdf")
         {
-            try
+            var response = await _reportsApiService.ExportCustomerReportAsync(format);
+            if (response != null && response.IsSuccessStatusCode)
             {
-                var start = startDate ?? DateTime.Today.AddDays(-30);
-                var end = endDate ?? DateTime.Today;
-
-                var queryParams = new List<string>
-                {
-                    $"startDate={start:yyyy-MM-dd}",
-                    $"endDate={end:yyyy-MM-dd}"
-                };
-
-                if (!string.IsNullOrEmpty(productType))
-                    queryParams.Add($"productType={productType}");
-
-                var queryString = string.Join("&", queryParams);
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}Reports/products?{queryString}");
-                var summaryResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Reports/products/summary?{queryString}");
-
-                if (response.IsSuccessStatusCode && summaryResponse.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var summaryContent = await summaryResponse.Content.ReadAsStringAsync();
-                    
-                    var products = JsonSerializer.Deserialize<List<ProductReportDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    var summary = JsonSerializer.Deserialize<ProductSummaryDto>(summaryContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                    ViewBag.Products = products;
-                    ViewBag.Summary = summary;
-                    ViewBag.StartDate = start;
-                    ViewBag.EndDate = end;
-                    ViewBag.ProductType = productType;
-                }
+                var content = await response.Content.ReadAsByteArrayAsync();
+                var contentType = format.ToLower() == "excel" ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "application/pdf";
+                var fileName = $"CustomerReport.{(format.ToLower() == "excel" ? "xlsx" : "pdf")}";
+                
+                return File(content, contentType, fileName);
             }
-            catch (Exception ex)
+            
+            ModelState.AddModelError("", "Rapor dışa aktarılırken hata oluştu.");
+            return RedirectToAction(nameof(CustomerReport));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ExportFinancialReport(string format = "pdf")
+        {
+            var response = await _reportsApiService.ExportFinancialReportAsync(format);
+            if (response != null && response.IsSuccessStatusCode)
             {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
+                var content = await response.Content.ReadAsByteArrayAsync();
+                var contentType = format.ToLower() == "excel" ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "application/pdf";
+                var fileName = $"FinancialReport.{(format.ToLower() == "excel" ? "xlsx" : "pdf")}";
+                
+                return File(content, contentType, fileName);
             }
+            
+            ModelState.AddModelError("", "Rapor dışa aktarılırken hata oluştu.");
+            return RedirectToAction(nameof(FinancialReport));
+        }
 
-            return View();
+        [HttpPost]
+        public async Task<IActionResult> ExportSalesReport(string format = "pdf")
+        {
+            var response = await _reportsApiService.ExportSalesReportAsync(format);
+            if (response != null && response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsByteArrayAsync();
+                var contentType = format.ToLower() == "excel" ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "application/pdf";
+                var fileName = $"SalesReport.{(format.ToLower() == "excel" ? "xlsx" : "pdf")}";
+                
+                return File(content, contentType, fileName);
+            }
+            
+            ModelState.AddModelError("", "Rapor dışa aktarılırken hata oluştu.");
+            return RedirectToAction(nameof(SalesReport));
+        }
+
+        private async Task LoadLookupData()
+        {
+            var currencies = await _lookupApiService.GetCurrenciesAsync() ?? new List<dynamic>();
+            ViewBag.Currencies = currencies;
+
+            var productTypes = await _lookupApiService.GetProductTypesAsync() ?? new List<dynamic>();
+            ViewBag.ProductTypes = productTypes;
         }
     }
-} 
+}

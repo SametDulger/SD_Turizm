@@ -1,57 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using SD_Turizm.Web.Models.DTOs;
-using System.Text;
-using System.Text.Json;
+using SD_Turizm.Web.Services;
 
 namespace SD_Turizm.Web.Controllers
 {
+    [Authorize]
     public class CruisePriceController : Controller
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl;
+        private readonly ICruisePriceApiService _cruisePriceApiService;
+        private readonly ILookupApiService _lookupApiService;
+        private readonly ICruiseApiService _cruiseApiService;
 
-        public CruisePriceController(HttpClient httpClient, IConfiguration configuration)
+        public CruisePriceController(ICruisePriceApiService cruisePriceApiService, ILookupApiService lookupApiService, ICruiseApiService cruiseApiService)
         {
-            _httpClient = httpClient;
-            _apiBaseUrl = configuration["ApiBaseUrl"] ?? "http://localhost:7000/api/";
+            _cruisePriceApiService = cruisePriceApiService;
+            _lookupApiService = lookupApiService;
+            _cruiseApiService = cruiseApiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}CruisePrice");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entities = JsonSerializer.Deserialize<List<CruisePriceDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entities);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return View(new List<CruisePriceDto>());
+            var entities = await _cruisePriceApiService.GetAllCruisePricesAsync() ?? new List<CruisePriceDto>();
+            return View(entities);
         }
 
         public async Task<IActionResult> Create()
         {
-            try
-            {
-                var cruisesResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Cruise");
-                if (cruisesResponse.IsSuccessStatusCode)
-                {
-                    var cruisesContent = await cruisesResponse.Content.ReadAsStringAsync();
-                    var cruises = JsonSerializer.Deserialize<List<CruiseDto>>(cruisesContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    ViewBag.CruiseId = cruises?.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = $"{c.Code} - {c.Name}" }).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Kruvaziyer listesi yüklenirken hata oluştu: {ex.Message}");
-            }
+            await LoadLookupData();
             return View();
         }
 
@@ -61,131 +37,102 @@ namespace SD_Turizm.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
+                var result = await _cruisePriceApiService.CreateCruisePriceAsync(entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync($"{_apiBaseUrl}CruisePrice", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Cruise fiyatı oluşturulurken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            try
+            var entity = await _cruisePriceApiService.GetCruisePriceByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}CruisePrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<CruisePriceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            try
+            var entity = await _cruisePriceApiService.GetCruisePriceByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}CruisePrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<CruisePriceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    var cruisesResponse = await _httpClient.GetAsync($"{_apiBaseUrl}Cruise");
-                    if (cruisesResponse.IsSuccessStatusCode)
-                    {
-                        var cruisesContent = await cruisesResponse.Content.ReadAsStringAsync();
-                        var cruises = JsonSerializer.Deserialize<List<CruiseDto>>(cruisesContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        ViewBag.CruiseId = cruises?.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = $"{c.Code} - {c.Name}" }).ToList();
-                    }
-                    
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            await LoadLookupData();
+            return View(entity);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, CruisePriceDto entity)
         {
+            if (id != entity.Id)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
-                try
+                var result = await _cruisePriceApiService.UpdateCruisePriceAsync(id, entity);
+                if (result != null)
                 {
-                    var json = JsonSerializer.Serialize(entity);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PutAsync($"{_apiBaseUrl}CruisePrice/{id}", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return RedirectToAction(nameof(Index));
-                    }
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-                }
+                ModelState.AddModelError("", "Cruise fiyatı güncellenirken hata oluştu.");
             }
             return View(entity);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var entity = await _cruisePriceApiService.GetCruisePriceByIdAsync(id);
+            if (entity == null)
             {
-                var response = await _httpClient.GetAsync($"{_apiBaseUrl}CruisePrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var entity = JsonSerializer.Deserialize<CruisePriceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(entity);
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            return View(entity);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            try
+            var result = await _cruisePriceApiService.DeleteCruisePriceAsync(id);
+            if (result)
             {
-                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}CruisePrice/{id}");
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Hata oluştu: {ex.Message}");
-            }
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError("", "Cruise fiyatı silinirken hata oluştu.");
+            return View();
+        }
+
+        private async Task LoadLookupData()
+        {
+            // Load Cruises
+            var cruises = await _cruiseApiService.GetAllCruisesAsync() ?? new List<CruiseDto>();
+            ViewBag.CruiseId = cruises.Select(c => new { Value = c.Id, Text = c.Name }).ToList();
+
+            // Load Room Types
+            var roomTypes = await _lookupApiService.GetRoomTypesAsync() ?? new List<dynamic>();
+            ViewBag.RoomTypes = roomTypes;
+
+            // Load Board Types
+            var boardTypes = await _lookupApiService.GetBoardTypesAsync() ?? new List<dynamic>();
+            ViewBag.BoardTypes = boardTypes;
+
+            // Load Room Locations
+            var roomLocations = await _lookupApiService.GetRoomLocationsAsync() ?? new List<dynamic>();
+            ViewBag.RoomLocations = roomLocations;
+
+            // Load Currencies
+            var currencies = await _lookupApiService.GetCurrenciesAsync() ?? new List<dynamic>();
+            ViewBag.Currencies = currencies;
         }
     }
-} 
+}
