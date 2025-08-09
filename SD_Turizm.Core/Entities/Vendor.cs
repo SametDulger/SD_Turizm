@@ -21,7 +21,7 @@ namespace SD_Turizm.Core.Entities
         [MaxLength(100)]
         public string Country { get; set; } = string.Empty;
         
-        public bool IsActive { get; set; } = true;
+
         
         [MaxLength(500)]
         public string Address { get; set; } = string.Empty;

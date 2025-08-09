@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SD_Turizm.Application.Services;
 using SD_Turizm.Core.Entities;
@@ -7,6 +8,7 @@ namespace SD_Turizm.API.Controllers.V1
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [Authorize]
     public class CariTransactionController : ControllerBase
     {
         private readonly ICariTransactionService _cariTransactionService;

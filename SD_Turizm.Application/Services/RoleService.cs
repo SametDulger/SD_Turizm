@@ -137,7 +137,7 @@ namespace SD_Turizm.Application.Services
             {
                 query = query.Where(r => 
                     r.Name.Contains(searchTerm) || 
-                    r.Description.Contains(searchTerm));
+                    (r.Description != null && r.Description.Contains(searchTerm)));
             }
 
             var totalCount = query.Count();

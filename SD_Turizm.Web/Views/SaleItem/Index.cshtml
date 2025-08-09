@@ -49,7 +49,7 @@
                                 <td>@item.SaleId</td>
                                 <td>
                                     @{
-                                        string typeName = item.ItemType;
+                                        string typeName = item.ItemType ?? "Unknown";
                                         if (ViewBag.VendorTypes != null)
                                         {
                                             foreach (var vt in ViewBag.VendorTypes)

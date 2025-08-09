@@ -22,7 +22,7 @@ namespace SD_Turizm.Web.Controllers
             try
             {
                 var entities = await _auditApiService.GetAllAuditLogsAsync() ?? new List<AuditLogDto>();
-                await LoadLookupData();
+                LoadLookupData();
                 return View(entities);
             }
             catch (Exception ex)
@@ -95,7 +95,7 @@ namespace SD_Turizm.Web.Controllers
             }
         }
 
-        private async Task LoadLookupData()
+        private void LoadLookupData()
         {
             // Basic lookup data for audit forms
         }

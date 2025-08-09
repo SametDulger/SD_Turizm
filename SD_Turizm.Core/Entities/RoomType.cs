@@ -6,7 +6,7 @@ namespace SD_Turizm.Core.Entities
         public string Name { get; set; } = string.Empty; // Tek Kişilik, Çift Kişilik, etc.
         public string Description { get; set; } = string.Empty;
         public int Capacity { get; set; } // Kaç kişilik
-        public bool IsActive { get; set; } = true;
+
         public int DisplayOrder { get; set; }
     }
 }

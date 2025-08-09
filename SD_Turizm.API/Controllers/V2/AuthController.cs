@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SD_Turizm.Application.Services;
 using SD_Turizm.Core.DTOs;
@@ -7,6 +8,7 @@ namespace SD_Turizm.API.Controllers.V2
     [ApiController]
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -19,6 +21,7 @@ namespace SD_Turizm.API.Controllers.V2
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginRequestDto request)
         {
             try
@@ -38,6 +41,7 @@ namespace SD_Turizm.API.Controllers.V2
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<ActionResult<RegisterResponseDto>> Register([FromBody] RegisterRequestDto request)
         {
             try

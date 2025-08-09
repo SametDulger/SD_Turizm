@@ -68,7 +68,6 @@ namespace SD_Turizm.Application.Services
             // Cache eviction callback
             options.RegisterPostEvictionCallback((key, value, reason, state) =>
             {
-                Console.WriteLine($"Cache item '{key}' was evicted. Reason: {reason}");
                 _expirationTimes.Remove(key?.ToString() ?? "");
             });
 

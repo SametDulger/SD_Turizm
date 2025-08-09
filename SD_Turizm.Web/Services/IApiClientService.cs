@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace SD_Turizm.Web.Services
 {
     public interface IApiClientService

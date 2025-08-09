@@ -27,7 +27,7 @@ namespace SD_Turizm.Web.Controllers
 
         public async Task<IActionResult> Create()
         {
-            await LoadLookupData();
+            LoadLookupData();
             return View();
         }
 
@@ -64,7 +64,7 @@ namespace SD_Turizm.Web.Controllers
             {
                 return NotFound();
             }
-            await LoadLookupData();
+            LoadLookupData();
             return View(entity);
         }
 

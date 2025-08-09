@@ -22,7 +22,7 @@ namespace SD_Turizm.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var hotels = await _hotelApiService.GetAllHotelsAsync();
-            await LoadLookupData();
+            LoadLookupData();
             return View(hotels);
         }
 
@@ -111,7 +111,7 @@ namespace SD_Turizm.Web.Controllers
             return View();
         }
 
-        private async Task LoadLookupData()
+        private void LoadLookupData()
         {
             // Basic lookup data if needed for hotel forms
         }

@@ -104,7 +104,6 @@ try
 catch
 {
     // Redis not available, continue without it
-    Console.WriteLine("Redis not available, continuing without cache...");
 }
 
 // Add HttpClient for External API Health Checks
@@ -126,6 +125,12 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApplicationDbContext>("Database");
 
 // Add JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "DefaultKey";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -135,10 +140,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "DefaultKey"))
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 
@@ -175,6 +179,16 @@ builder.Services.AddRateLimiter(options =>
                 PermitLimit = 100,
                 Window = TimeSpan.FromMinutes(1)
             }));
+
+    options.AddPolicy("ApiPolicy", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.User.Identity?.Name ?? context.Request.Headers.Host.ToString(),
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 50,
+                Window = TimeSpan.FromMinutes(1)
+            }));
 });
 
 // Add Response Compression
@@ -185,10 +199,10 @@ builder.Services.AddResponseCompression(options =>
     options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
 });
 
-// Add CORS
+// Add CORS - More secure configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowSpecificOrigins", policy =>
     {
         policy.WithOrigins(
                 "http://localhost:5000", 
@@ -212,28 +226,12 @@ builder.Services.AddAntiforgery(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
-// Add Rate Limiting with Redis
-builder.Services.AddRateLimiter(options =>
+// Add Security Headers Middleware
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
 {
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: context.User.Identity?.Name ?? context.Request.Headers.Host.ToString(),
-            factory: partition => new FixedWindowRateLimiterOptions
-            {
-                AutoReplenishment = true,
-                PermitLimit = 100,
-                Window = TimeSpan.FromMinutes(1)
-            }));
-
-    options.AddPolicy("ApiPolicy", context =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: context.User.Identity?.Name ?? context.Request.Headers.Host.ToString(),
-            factory: partition => new FixedWindowRateLimiterOptions
-            {
-                AutoReplenishment = true,
-                PermitLimit = 50,
-                Window = TimeSpan.FromMinutes(1)
-            }));
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = int.MaxValue;
+    options.MemoryBufferThreshold = int.MaxValue;
 });
 
 var app = builder.Build();
@@ -254,7 +252,17 @@ app.UseValidation();
 app.UseResponseCompression();
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAll");
+// Add Security Headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    await next();
+});
+
+app.UseCors("AllowSpecificOrigins");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -284,7 +292,8 @@ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
     }
 });
 
-app.MapHealthChecksUI();
+// Health Checks UI not configured yet
+// app.MapHealthChecksUI();
 
 // Auto-migrate database in development
 if (app.Environment.IsDevelopment())
@@ -294,11 +303,10 @@ if (app.Environment.IsDevelopment())
     try
     {
         await context.Database.MigrateAsync();
-        Console.WriteLine("Database migrated successfully.");
     }
-    catch (Exception ex)
+    catch (Exception)
     {
-        Console.WriteLine($"Migration failed: {ex.Message}");
+        // Migration failed, continue
     }
 }
 

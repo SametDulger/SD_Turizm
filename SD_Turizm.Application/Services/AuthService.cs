@@ -8,6 +8,7 @@ using System.Text;
 using SD_Turizm.Core.DTOs;
 using SD_Turizm.Core.Entities;
 using SD_Turizm.Core.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace SD_Turizm.Application.Services
 {
@@ -16,13 +17,15 @@ namespace SD_Turizm.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<AuthService> _logger;
         private readonly Dictionary<string, string> _refreshTokens = new();
 
-        public AuthService(IUnitOfWork unitOfWork, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public AuthService(IUnitOfWork unitOfWork, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger)
         {
             _unitOfWork = unitOfWork;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         public async Task<LoginResponseDto> LoginAsync(string username, string password)
@@ -122,7 +125,7 @@ namespace SD_Turizm.Application.Services
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "DefaultKey");
+                var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "DefaultKey");
                 
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
@@ -250,7 +253,17 @@ namespace SD_Turizm.Application.Services
         private string GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "DefaultKey");
+            var jwtKey = _configuration["Jwt:Key"] ?? "DefaultKey";
+            var jwtIssuer = _configuration["Jwt:Issuer"];
+            var jwtAudience = _configuration["Jwt:Audience"];
+            
+            // DEBUG: JWT konfigürasyonunu logla
+            _logger.LogWarning("=== JWT TOKEN GENERATION DEBUG ===");
+            _logger.LogWarning("Key: {KeyPreview}", jwtKey?.Length > 10 ? jwtKey.Substring(0, 10) + "..." : jwtKey);
+            _logger.LogWarning("Issuer: {Issuer}", jwtIssuer);
+            _logger.LogWarning("Audience: {Audience}", jwtAudience);
+            
+            var key = Encoding.UTF8.GetBytes(jwtKey);
             
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -261,8 +274,8 @@ namespace SD_Turizm.Application.Services
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddHours(24),
-                Issuer = _configuration["Jwt:Issuer"],
-                Audience = _configuration["Jwt:Audience"],
+                Issuer = jwtIssuer,
+                Audience = jwtAudience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -280,15 +293,21 @@ namespace SD_Turizm.Application.Services
 
         private string HashPassword(string password)
         {
-            using var sha256 = SHA256.Create();
-            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(hashedBytes);
+            return BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt(12));
         }
+
+
 
         private bool VerifyPassword(string password, string hash)
         {
-            var hashedPassword = HashPassword(password);
-            return hashedPassword == hash;
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(password, hash);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using SD_Turizm.Web.Models.DTOs;
+using System.Linq;
 
 namespace SD_Turizm.Web.Services
 {
@@ -26,9 +27,13 @@ namespace SD_Turizm.Web.Services
             return await _apiClient.GetAsync<SalesReportDto>("Reports/sales");
         }
 
-        public async Task<ProductReportDto?> GetProductReportAsync()
+        public async Task<dynamic?> GetProductReportDataAsync()
         {
-            return await _apiClient.GetAsync<ProductReportDto>("Reports/product");
+            var result = await _apiClient.GetAsync<PagedResult<ProductReportDto>>("Reports/product");
+            return new { 
+                Products = result?.Items ?? new List<ProductReportDto>(),
+                Summary = result?.Items?.FirstOrDefault() ?? new ProductReportDto()
+            };
         }
 
         public async Task<HttpResponseMessage?> ExportCustomerReportAsync(string format = "pdf")
@@ -53,17 +58,29 @@ namespace SD_Turizm.Web.Services
 
         public async Task<dynamic?> GetCustomerReportDataAsync()
         {
-            return await _apiClient.GetAsync<dynamic>("Reports/customer");
+            var result = await _apiClient.GetAsync<PagedResult<CustomerReportDto>>("Reports/customer");
+            return new { 
+                Customers = result?.Items ?? new List<CustomerReportDto>(),
+                Summary = result?.Items?.FirstOrDefault() ?? new CustomerReportDto()
+            };
         }
 
         public async Task<dynamic?> GetFinancialReportDataAsync()
         {
-            return await _apiClient.GetAsync<dynamic>("Reports/financial");
+            var result = await _apiClient.GetAsync<PagedResult<FinancialReportDto>>("Reports/financial");
+            return new { 
+                Financial = result?.Items ?? new List<FinancialReportDto>(),
+                Summary = result?.Items?.FirstOrDefault() ?? new FinancialReportDto()
+            };
         }
 
         public async Task<dynamic?> GetSalesReportDataAsync()
         {
-            return await _apiClient.GetAsync<dynamic>("Reports/sales");
+            var result = await _apiClient.GetAsync<PagedResult<SalesReportDto>>("Reports/sales");
+            return new { 
+                Sales = result?.Items ?? new List<SalesReportDto>(),
+                Summary = result?.Items?.FirstOrDefault() ?? new SalesReportDto()
+            };
         }
     }
 }

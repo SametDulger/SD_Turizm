@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SD_Turizm.Application.Services;
 using SD_Turizm.Core.Entities;
@@ -7,6 +8,7 @@ namespace SD_Turizm.API.Controllers.V1
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [Authorize]
     public class HotelsController : ControllerBase
     {
         private readonly IHotelService _hotelService;
@@ -44,6 +46,18 @@ namespace SD_Turizm.API.Controllers.V1
         [HttpPost]
         public async Task<ActionResult<Hotel>> Create(Hotel hotel)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (hotel == null)
+                return BadRequest("Hotel data is required");
+
+            if (string.IsNullOrWhiteSpace(hotel.Name))
+                return BadRequest("Hotel name is required");
+
+            if (string.IsNullOrWhiteSpace(hotel.Code))
+                return BadRequest("Hotel code is required");
+
             var createdHotel = await _hotelService.CreateAsync(hotel);
             return CreatedAtAction(nameof(GetById), new { id = createdHotel.Id }, createdHotel);
         }
@@ -51,8 +65,20 @@ namespace SD_Turizm.API.Controllers.V1
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, Hotel hotel)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (hotel == null)
+                return BadRequest("Hotel data is required");
+
             if (id != hotel.Id)
-                return BadRequest();
+                return BadRequest("ID mismatch");
+
+            if (string.IsNullOrWhiteSpace(hotel.Name))
+                return BadRequest("Hotel name is required");
+
+            if (string.IsNullOrWhiteSpace(hotel.Code))
+                return BadRequest("Hotel code is required");
 
             if (!await _hotelService.ExistsAsync(id))
                 return NotFound();

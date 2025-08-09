@@ -27,7 +27,7 @@ namespace SD_Turizm.Core.Entities
         [MaxLength(20)]
         public string? PhoneNumber { get; set; }
         
-        public new bool IsActive { get; set; } = true;
+
         
         public DateTime LastLoginDate { get; set; }
         

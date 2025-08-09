@@ -7,7 +7,7 @@ namespace SD_Turizm.Core.Entities
         public string Description { get; set; } = string.Empty;
         public int MinAge { get; set; } // Minimum yaş
         public int MaxAge { get; set; } // Maximum yaş
-        public bool IsActive { get; set; } = true;
+
         public int DisplayOrder { get; set; }
     }
 }

@@ -81,8 +81,8 @@ namespace SD_Turizm.Application.Services
                 query = query.Where(a => 
                     a.TableName.Contains(searchTerm) || 
                     a.Action.Contains(searchTerm) ||
-                    a.Username.Contains(searchTerm) ||
-                    a.Description.Contains(searchTerm));
+                    (a.Username != null && a.Username.Contains(searchTerm)) ||
+                    (a.Description != null && a.Description.Contains(searchTerm)));
             }
 
             if (!string.IsNullOrEmpty(tableName))

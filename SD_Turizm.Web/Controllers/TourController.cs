@@ -22,7 +22,7 @@ namespace SD_Turizm.Web.Controllers
             try
             {
                 var entities = await _tourApiService.GetAllToursAsync();
-                await LoadLookupData();
+                LoadLookupData();
                 return View(entities);
             }
             catch (Exception ex)
@@ -156,7 +156,7 @@ namespace SD_Turizm.Web.Controllers
             return RedirectToAction(nameof(Delete), new { id });
         }
 
-        private async Task LoadLookupData()
+        private void LoadLookupData()
         {
             // Basic lookup data if needed for tour forms
         }

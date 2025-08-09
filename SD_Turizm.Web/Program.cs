@@ -11,7 +11,7 @@ builder.Logging.SetMinimumLevel(LogLevel.Information);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Add HttpClient
+// Add HttpClient Factory
 builder.Services.AddHttpClient();
 
 // Add HttpContextAccessor

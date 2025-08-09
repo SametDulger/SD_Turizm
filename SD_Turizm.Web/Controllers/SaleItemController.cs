@@ -22,13 +22,13 @@ namespace SD_Turizm.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var entities = await _saleItemApiService.GetAllSaleItemsAsync() ?? new List<SaleItemDto>();
-            await LoadLookupData();
+            LoadLookupData();
             return View(entities);
         }
 
         public async Task<IActionResult> Create()
         {
-            await LoadLookupData();
+            LoadLookupData();
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace SD_Turizm.Web.Controllers
             {
                 return NotFound();
             }
-            await LoadLookupData();
+            LoadLookupData();
             return View(entity);
         }
 
