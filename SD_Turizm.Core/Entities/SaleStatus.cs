@@ -6,7 +6,7 @@ namespace SD_Turizm.Core.Entities
         public string Name { get; set; } = string.Empty; // Beklemede, Onaylandı, İptal Edildi, Tamamlandı
         public string Description { get; set; } = string.Empty;
         public string Color { get; set; } = string.Empty; // CSS color for UI
-        public bool IsActive { get; set; } = true;
+
         public int DisplayOrder { get; set; }
     }
 }

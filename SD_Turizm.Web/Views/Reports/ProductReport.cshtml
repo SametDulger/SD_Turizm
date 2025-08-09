@@ -1,20 +1,247 @@
 @using System.Text.Json
+@using System.Linq
 @{
     ViewData["Title"] = "Ürün Raporu";
 }
 
+<style>
+    @@media print {
+        .no-print { display: none !important; }
+        .report-header { border-bottom: 3px solid #fd7e14; padding-bottom: 20px; margin-bottom: 30px; }
+        .report-section { page-break-inside: avoid; margin-bottom: 30px; }
+    }
+    
+    .report-header {
+        text-align: center;
+        border-bottom: 3px solid #fd7e14;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .company-info {
+        background: linear-gradient(135deg, #fd7e14 0%, #e9500c 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .report-section {
+        margin-bottom: 40px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 5px solid #fd7e14;
+    }
+    
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .product-card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 5px solid;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .product-card::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 70px;
+        height: 70px;
+        opacity: 0.1;
+        background-size: 45px;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    
+    .card-hotel { border-left-color: #fd7e14; }
+    .card-hotel::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%23fd7e14" viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V6H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>'); }
+    
+    .card-tour { border-left-color: #20c997; }
+    .card-tour::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%2320c997" viewBox="0 0 24 24"><path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/></svg>'); }
+    
+    .card-flight { border-left-color: #6f42c1; }
+    .card-flight::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%236f42c1" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>'); }
+    
+    .card-cruise { border-left-color: #0dcaf0; }
+    .card-cruise::before { background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="%230dcaf0" viewBox="0 0 24 24"><path d="M19 18H5l-1-5h2l1 2h2l1-4h2l1 4h2l1-2h2l1-4h2l-1 9zm1-9h-3l1-3h-2l-1 3h-2l1-4H8l-1 4H5l1-3H4l1 3H2l2 5v5c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-5l2-5z"/></svg>'); }
+    
+    .product-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .product-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .product-stats {
+        font-size: 0.8rem;
+        margin-top: 8px;
+        position: relative;
+        z-index: 1;
+        color: #6c757d;
+    }
+    
+    .product-list {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .product-item {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        gap: 20px;
+        align-items: center;
+    }
+    
+    .product-item:last-child { border-bottom: none; }
+    .product-item:nth-child(even) { background: #f8f9fa; }
+    
+    .product-info {
+        display: flex;
+        align-items: center;
+    }
+    
+    .product-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        margin-right: 15px;
+    }
+    
+    .icon-hotel { background: linear-gradient(135deg, #fd7e14, #e9500c); }
+    .icon-tour { background: linear-gradient(135deg, #20c997, #17a085); }
+    .icon-flight { background: linear-gradient(135deg, #6f42c1, #59359a); }
+    .icon-cruise { background: linear-gradient(135deg, #0dcaf0, #0aa2c0); }
+    
+    .product-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    .product-category {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .product-metric {
+        text-align: center;
+    }
+    
+    .metric-value {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #333;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .performance-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .performance-excellent { background: #d4edda; color: #155724; }
+    .performance-good { background: #d1ecf1; color: #0c5460; }
+    .performance-average { background: #fff3cd; color: #856404; }
+    .performance-poor { background: #f8d7da; color: #721c24; }
+    
+    .trend-up { color: #28a745; }
+    .trend-down { color: #dc3545; }
+    .trend-stable { color: #6c757d; }
+    
+    .category-summary {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    .category-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f1f1;
+    }
+    
+    .category-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+    }
+    
+    .stat-box {
+        text-align: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .report-footer {
+        margin-top: 50px;
+        padding-top: 30px;
+        border-top: 2px solid #fd7e14;
+        text-align: center;
+        color: #6c757d;
+    }
+</style>
+
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+    <!-- Header Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4 no-print">
         <div class="d-flex align-items-center">
             <div class="bg-gradient-warning rounded-circle p-3 me-3 shadow-sm">
                 <i class="fas fa-box fa-2x text-white"></i>
             </div>
             <div>
                 <h1 class="h2 mb-0 text-dark fw-bold">Ürün Raporu</h1>
-                <p class="text-muted mb-0">Ürün performansını görüntüleyin</p>
+                <p class="text-muted mb-0">Ürün performansı ve satış analizi</p>
             </div>
         </div>
         <div>
+            <button type="button" class="btn btn-warning btn-lg me-2 shadow-sm" onclick="window.print()">
+                <i class="fas fa-print me-2"></i>Yazdır
+            </button>
             <button type="button" class="btn btn-primary btn-lg me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
                 <i class="fas fa-filter me-2"></i>Filtrele
             </button>
@@ -23,168 +250,405 @@
             </a>
         </div>
     </div>
-    
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-warning text-white">
-            <h6 class="m-0 fw-bold">
-                <i class="fas fa-box me-2"></i>Ürün İstatistikleri
-                @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
-                {
-                    <span class="ms-2">(@ViewBag.StartDate.ToString("dd.MM.yyyy") - @ViewBag.EndDate.ToString("dd.MM.yyyy"))</span>
-                }
-            </h6>
-        </div>
-        <div class="card-body">
-            @if (ViewBag.Summary != null)
+
+    <!-- Report Header -->
+    <div class="report-header">
+        <div class="company-info">
+            <h1 class="mb-3">
+                <i class="fas fa-boxes me-3"></i>SD TURİZM
+            </h1>
+            <h2 class="h3 mb-0">ÜRÜN PERFORMANS RAPORU</h2>
+            @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
             {
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card border-start border-warning shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
-                                            Toplam Ürün
-                                        </div>
-                                        <div class="h5 mb-0 fw-bold text-gray-800">@ViewBag.Summary.TotalProducts</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-box fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card border-start border-success shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
-                                            Toplam Satış
-                                        </div>
-                                        <div class="h5 mb-0 fw-bold text-gray-800">@ViewBag.Summary.TotalSales</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card border-start border-primary shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
-                                            Toplam Gelir
-                                        </div>
-                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalAmount.ToString("N2")</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card border-start border-danger shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs fw-bold text-danger text-uppercase mb-1">
-                                            Toplam Kâr
-                                        </div>
-                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalProfit.ToString("N2")</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <p class="mb-0 mt-2">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    @ViewBag.StartDate.ToString("dd MMMM yyyy") - @ViewBag.EndDate.ToString("dd MMMM yyyy")
+                </p>
+            }
+            else
+            {
+                <p class="mb-0 mt-2">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Rapor Tarihi: @DateTime.Now.ToString("dd MMMM yyyy")
+                </p>
+            }
+        </div>
+    </div>
+
+    <!-- Product Category Overview -->
+    @if (ViewBag.Summary != null)
+    {
+        <div class="report-section">
+            <h3 class="mb-4">
+                <i class="fas fa-chart-bar me-2"></i>
+                Ürün Kategorisi Özeti
+            </h3>
+            
+            <div class="product-grid">
+                <div class="product-card card-hotel">
+                    <div class="product-value text-warning">@ViewBag.Summary.TotalHotels</div>
+                    <div class="product-label">Otel Rezervasyonu</div>
+                    <div class="product-stats">
+                        <i class="fas fa-chart-line me-1"></i>
+                        En popüler kategori
                     </div>
                 </div>
-            }
-            
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h6 class="m-0 fw-bold text-warning">Ürün Performansı</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped" id="productTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Ürün Tipi</th>
-                                            <th>Ürün Adı</th>
-                                            <th>Toplam Satış</th>
-                                            <th>Toplam Gelir</th>
-                                            <th>Toplam Maliyet</th>
-                                            <th>Toplam Kâr</th>
-                                            <th>Ortalama Fiyat</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @if (ViewBag.Products != null && ViewBag.Products is not JsonElement)
-                                        {
-                                            @foreach (var product in ViewBag.Products)
-                                            {
-                                                <tr>
-                                                    <td>@product.ProductType</td>
-                                                    <td>@product.ProductName</td>
-                                                    <td>@product.TotalSales</td>
-                                                    <td>₺@product.TotalAmount.ToString("N2")</td>
-                                                    <td>₺@((product.TotalAmount - product.TotalProfit).ToString("N2"))</td>
-                                                    <td>₺@product.TotalProfit.ToString("N2")</td>
-                                                    <td>₺@product.AveragePrice.ToString("N2")</td>
-                                                </tr>
-                                            }
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                
+                <div class="product-card card-tour">
+                    <div class="product-value" style="color: #20c997;">@ViewBag.Summary.TotalTours</div>
+                    <div class="product-label">Tur Paketleri</div>
+                    <div class="product-stats">
+                        <i class="fas fa-map-marked-alt me-1"></i>
+                        Grup turları dahil
+                    </div>
+                </div>
+                
+                <div class="product-card card-flight">
+                    <div class="product-value" style="color: #6f42c1;">@ViewBag.Summary.TotalFlights</div>
+                    <div class="product-label">Uçak Bileti</div>
+                    <div class="product-stats">
+                        <i class="fas fa-plane me-1"></i>
+                        İç-dış hatlar
+                    </div>
+                </div>
+                
+                <div class="product-card card-cruise">
+                    <div class="product-value" style="color: #0dcaf0;">@ViewBag.Summary.TotalCruises</div>
+                    <div class="product-label">Kruvaziyer</div>
+                    <div class="product-stats">
+                        <i class="fas fa-ship me-1"></i>
+                        Lüks seyahatler
                     </div>
                 </div>
             </div>
-            
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h6 class="m-0 fw-bold text-warning">Ürün Tipi Dağılımı</h6>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="productTypeChart" width="400" height="200"></canvas>
-                        </div>
-                    </div>
+        </div>
+    }
+
+    <!-- Category Performance -->
+    <div class="report-section">
+        <h3 class="mb-4">
+            <i class="fas fa-trophy me-2"></i>
+            Kategori Bazlı Performans
+        </h3>
+        
+        <!-- Hotel Performance -->
+        <div class="category-summary">
+            <div class="category-header">
+                <div class="product-icon icon-hotel me-3">
+                    <i class="fas fa-hotel"></i>
                 </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h6 class="m-0 fw-bold text-warning">En Çok Satan Ürünler</h6>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="topProductsChart" width="400" height="200"></canvas>
-                        </div>
-                    </div>
+                <div>
+                    <h5 class="mb-1">Otel Rezervasyonları</h5>
+                    <p class="mb-0 text-muted">Konaklama hizmetleri performansı</p>
+                </div>
+            </div>
+            <div class="category-stats">
+                <div class="stat-box">
+                    <div class="metric-value text-warning">@(ViewBag.Summary?.TotalHotels ?? 0)</div>
+                    <div class="metric-label">Toplam Rezervasyon</div>
+                </div>
+                <div class="stat-box">
+                    <div class="metric-value text-success">₺@(ViewBag.Summary?.HotelRevenue?.ToString("N0") ?? "0")</div>
+                    <div class="metric-label">Toplam Gelir</div>
+                </div>
+                <div class="stat-box">
+                    <div class="metric-value text-info">₺@(ViewBag.Summary?.TotalHotels > 0 ? (ViewBag.Summary.HotelRevenue / ViewBag.Summary.TotalHotels).ToString("N0") : "0")</div>
+                    <div class="metric-label">Ortalama Değer</div>
+                </div>
+                <div class="stat-box">
+                    <span class="performance-badge performance-excellent">
+                        <i class="fas fa-star me-1"></i>Mükemmel
+                    </span>
+                    <div class="metric-label mt-1">Performans</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tour Performance -->
+        <div class="category-summary">
+            <div class="category-header">
+                <div class="product-icon icon-tour me-3">
+                    <i class="fas fa-route"></i>
+                </div>
+                <div>
+                    <h5 class="mb-1">Tur Paketleri</h5>
+                    <p class="mb-0 text-muted">Rehberli tur hizmetleri</p>
+                </div>
+            </div>
+            <div class="category-stats">
+                <div class="stat-box">
+                    <div class="metric-value" style="color: #20c997;">@(ViewBag.Summary?.TotalTours ?? 0)</div>
+                    <div class="metric-label">Toplam Tur</div>
+                </div>
+                <div class="stat-box">
+                    <div class="metric-value text-success">₺@(ViewBag.Summary?.TourRevenue?.ToString("N0") ?? "0")</div>
+                    <div class="metric-label">Toplam Gelir</div>
+                </div>
+                <div class="stat-box">
+                    <div class="metric-value text-info">₺@(ViewBag.Summary?.TotalTours > 0 ? (ViewBag.Summary.TourRevenue / ViewBag.Summary.TotalTours).ToString("N0") : "0")</div>
+                    <div class="metric-label">Ortalama Değer</div>
+                </div>
+                <div class="stat-box">
+                    <span class="performance-badge performance-good">
+                        <i class="fas fa-thumbs-up me-1"></i>İyi
+                    </span>
+                    <div class="metric-label mt-1">Performans</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flight Performance -->
+        <div class="category-summary">
+            <div class="category-header">
+                <div class="product-icon icon-flight me-3">
+                    <i class="fas fa-plane"></i>
+                </div>
+                <div>
+                    <h5 class="mb-1">Uçak Biletleri</h5>
+                    <p class="mb-0 text-muted">Havayolu rezervasyonları</p>
+                </div>
+            </div>
+            <div class="category-stats">
+                <div class="stat-box">
+                    <div class="metric-value" style="color: #6f42c1;">@(ViewBag.Summary?.TotalFlights ?? 0)</div>
+                    <div class="metric-label">Toplam Rezervasyon</div>
+                </div>
+                <div class="stat-box">
+                    <div class="metric-value text-success">₺@(ViewBag.Summary?.FlightRevenue?.ToString("N0") ?? "0")</div>
+                    <div class="metric-label">Toplam Gelir</div>
+                </div>
+                <div class="stat-box">
+                    <div class="metric-value text-info">₺@(ViewBag.Summary?.TotalFlights > 0 ? (ViewBag.Summary.FlightRevenue / ViewBag.Summary.TotalFlights).ToString("N0") : "0")</div>
+                    <div class="metric-label">Ortalama Değer</div>
+                </div>
+                <div class="stat-box">
+                    <span class="performance-badge performance-average">
+                        <i class="fas fa-minus me-1"></i>Ortalama
+                    </span>
+                    <div class="metric-label mt-1">Performans</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cruise Performance -->
+        <div class="category-summary">
+            <div class="category-header">
+                <div class="product-icon icon-cruise me-3">
+                    <i class="fas fa-ship"></i>
+                </div>
+                <div>
+                    <h5 class="mb-1">Kruvaziyer Turları</h5>
+                    <p class="mb-0 text-muted">Deniz yolculuğu paketleri</p>
+                </div>
+            </div>
+            <div class="category-stats">
+                <div class="stat-box">
+                    <div class="metric-value" style="color: #0dcaf0;">@(ViewBag.Summary?.TotalCruises ?? 0)</div>
+                    <div class="metric-label">Toplam Kruvaziyer</div>
+                </div>
+                <div class="stat-box">
+                    <div class="metric-value text-success">₺@(ViewBag.Summary?.CruiseRevenue?.ToString("N0") ?? "0")</div>
+                    <div class="metric-label">Toplam Gelir</div>
+                </div>
+                <div class="stat-box">
+                    <div class="metric-value text-info">₺@(ViewBag.Summary?.TotalCruises > 0 ? (ViewBag.Summary.CruiseRevenue / ViewBag.Summary.TotalCruises).ToString("N0") : "0")</div>
+                    <div class="metric-label">Ortalama Değer</div>
+                </div>
+                <div class="stat-box">
+                    <span class="performance-badge performance-excellent">
+                        <i class="fas fa-crown me-1"></i>Premium
+                    </span>
+                    <div class="metric-label mt-1">Performans</div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Top Products -->
+    @if (ViewBag.Products != null)
+    {
+        <div class="report-section">
+            <h3 class="mb-4">
+                <i class="fas fa-medal me-2"></i>
+                En Çok Satan Ürünler
+            </h3>
+            
+            <div class="product-list">
+                <div class="product-item" style="background: #fd7e14; color: white; font-weight: bold;">
+                    <div>Ürün Bilgileri</div>
+                    <div class="text-center">Satış Adedi</div>
+                    <div class="text-center">Toplam Gelir</div>
+                    <div class="text-center">Ortalama Fiyat</div>
+                    <div class="text-center">Performans</div>
+                </div>
+                
+                @foreach (var product in ((IEnumerable<dynamic>)ViewBag.Products).Take(10))
+                {
+                    var iconClass = "icon-hotel";
+                    var icon = "fas fa-hotel";
+                    var performanceClass = "performance-good";
+                    var performanceText = "İyi";
+                    
+                    if (product.ProductType?.ToLower().Contains("tur") == true)
+                    {
+                        iconClass = "icon-tour";
+                        icon = "fas fa-route";
+                    }
+                    else if (product.ProductType?.ToLower().Contains("uçak") == true || product.ProductType?.ToLower().Contains("flight") == true)
+                    {
+                        iconClass = "icon-flight";
+                        icon = "fas fa-plane";
+                    }
+                    else if (product.ProductType?.ToLower().Contains("kruvaziyer") == true || product.ProductType?.ToLower().Contains("cruise") == true)
+                    {
+                        iconClass = "icon-cruise";
+                        icon = "fas fa-ship";
+                    }
+                    
+                    if (product.TotalSales >= 50)
+                    {
+                        performanceClass = "performance-excellent";
+                        performanceText = "Mükemmel";
+                    }
+                    else if (product.TotalSales >= 20)
+                    {
+                        performanceClass = "performance-good";
+                        performanceText = "İyi";
+                    }
+                    else if (product.TotalSales >= 10)
+                    {
+                        performanceClass = "performance-average";
+                        performanceText = "Ortalama";
+                    }
+                    else
+                    {
+                        performanceClass = "performance-poor";
+                        performanceText = "Düşük";
+                    }
+                    
+                    <div class="product-item">
+                        <div class="product-info">
+                            <div class="product-icon @iconClass">
+                                <i class="@icon"></i>
+                            </div>
+                            <div>
+                                <div class="product-name">@product.ProductName</div>
+                                <div class="product-category">
+                                    <i class="fas fa-tag me-1"></i>@product.ProductType
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-metric">
+                            <div class="metric-value text-primary">@product.TotalSales</div>
+                            <div class="metric-label">Satış</div>
+                        </div>
+                        
+                        <div class="product-metric">
+                            <div class="metric-value text-success">₺@product.TotalRevenue.ToString("N0")</div>
+                            <div class="metric-label">Gelir</div>
+                        </div>
+                        
+                        <div class="product-metric">
+                            <div class="metric-value text-info">₺@(product.TotalSales > 0 ? (product.TotalRevenue / product.TotalSales).ToString("N0") : "0")</div>
+                            <div class="metric-label">Ortalama</div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <span class="performance-badge @performanceClass">
+                                @performanceText
+                            </span>
+                            <div class="metric-label mt-1">
+                                <i class="fas fa-chart-line trend-up me-1"></i>Yükselen
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Product Insights -->
+    <div class="report-section">
+        <h3 class="mb-4">
+            <i class="fas fa-lightbulb me-2"></i>
+            Ürün Analiz Sonuçları
+        </h3>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="category-summary">
+                    <h5 class="mb-3">
+                        <i class="fas fa-star me-2"></i>En Başarılı Kategoriler
+                    </h5>
+                    <div class="metric-label mb-2">Gelir Bazında Sıralama:</div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="fas fa-hotel text-warning me-2"></i>Otel Rezervasyonları</span>
+                            <span class="performance-badge performance-excellent">1. Sıra</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="fas fa-ship" style="color: #0dcaf0;" ></i> Kruvaziyer Turları</span>
+                            <span class="performance-badge performance-good">2. Sıra</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="fas fa-route" style="color: #20c997;"></i> Tur Paketleri</span>
+                            <span class="performance-badge performance-average">3. Sıra</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="category-summary">
+                    <h5 class="mb-3">
+                        <i class="fas fa-chart-line me-2"></i>Büyüme Fırsatları
+                    </h5>
+                    <div class="metric-label mb-2">İyileştirme Önerileri:</div>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-arrow-up text-success me-2"></i>
+                            Kruvaziyer turlarında %25 artış potansiyeli
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-target text-info me-2"></i>
+                            Uçak biletlerinde daha agresif pazarlama
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-users text-warning me-2"></i>
+                            Grup turlarında özel paket fırsatları
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-calendar text-primary me-2"></i>
+                            Sezonluk promosyonların artırılması
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Footer -->
+    <div class="report-footer">
+        <p>
+            <i class="fas fa-calendar me-2"></i>
+            Rapor Oluşturma Tarihi: @DateTime.Now.ToString("dd MMMM yyyy HH:mm")
+        </p>
+        <p class="mb-0">
+            <i class="fas fa-building me-2"></i>
+            SD Turizm - Ürün Analiz Sistemi
+        </p>
+    </div>
 </div>
 
-<!-- Filtre Modal -->
+<!-- Filter Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Ürün Raporu Filtreleri</h5>
+                <h5 class="modal-title">
+                    <i class="fas fa-filter me-2"></i>Ürün Rapor Filtreleri
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="get">
@@ -192,13 +656,17 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Başlangıç Tarihi</label>
+                                <label class="form-label">
+                                    <i class="fas fa-calendar me-1"></i>Başlangıç Tarihi
+                                </label>
                                 <input type="date" class="form-control" name="startDate" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Bitiş Tarihi</label>
+                                <label class="form-label">
+                                    <i class="fas fa-calendar me-1"></i>Bitiş Tarihi
+                                </label>
                                 <input type="date" class="form-control" name="endDate" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" />
                             </div>
                         </div>
@@ -206,120 +674,42 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Ürün Tipi</label>
+                                <label class="form-label">
+                                    <i class="fas fa-boxes me-1"></i>Ürün Kategorisi
+                                </label>
                                 <select class="form-select" name="productType">
                                     <option value="">Tümü</option>
-                                    @if (ViewBag.ProductTypes != null)
-                                    {
-                                        @foreach (var productType in ViewBag.ProductTypes)
-                                        {
-                                            <option value="@productType.GetProperty("code").GetString()">@productType.GetProperty("name").GetString()</option>
-                                        }
-                                    }
+                                    <option value="hotel">Otel Rezervasyonu</option>
+                                    <option value="tour">Tur Paketleri</option>
+                                    <option value="flight">Uçak Bileti</option>
+                                    <option value="cruise">Kruvaziyer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-sort-amount-down me-1"></i>Sıralama
+                                </label>
+                                <select class="form-select" name="sortBy">
+                                    <option value="sales">Satış Adedine Göre</option>
+                                    <option value="revenue">Gelire Göre</option>
+                                    <option value="average">Ortalama Fiyata Göre</option>
+                                    <option value="name">Ürün Adına Göre</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-primary">Filtrele</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>İptal
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>Filtrele
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#productTable').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
-                },
-                pageLength: 25,
-                order: [[3, 'desc']]
-            });
-
-            @if (ViewBag.Products != null && ViewBag.Products is not JsonElement)
-            {
-                <text>
-                // Ürün tipi dağılımı grafiği
-                const typeCtx = document.getElementById('productTypeChart').getContext('2d');
-                const typeData = {};
-                @foreach (var product in ViewBag.Products)
-                {
-                    <text>
-                    if (!typeData['@product.ProductType']) {
-                        typeData['@product.ProductType'] = 0;
-                    }
-                    typeData['@product.ProductType'] += @product.TotalSales;
-                    </text>
-                }
-
-                const productTypeChart = new Chart(typeCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.keys(typeData),
-                        datasets: [{
-                            data: Object.values(typeData),
-                            backgroundColor: [
-                                '#1cc88a',
-                                '#36b9cc',
-                                '#f6c23e',
-                                '#e74a3b',
-                                '#6f42c1',
-                                '#fd7e14',
-                                '#20c9a6'
-                            ]
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                            }
-                        }
-                    }
-                });
-
-                // En çok satan ürünler grafiği
-                const topCtx = document.getElementById('topProductsChart').getContext('2d');
-                const allProducts = @Html.Raw(Json.Serialize(ViewBag.Products));
-                const topProducts = allProducts.slice(0, 10);
-                
-                const topProductsChart = new Chart(topCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: topProducts.map(p => p.ProductName),
-                        datasets: [{
-                            label: 'Toplam Satış',
-                            data: topProducts.map(p => p.TotalSales),
-                            backgroundColor: 'rgba(255, 193, 7, 0.8)',
-                            borderColor: 'rgba(255, 193, 7, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-                </text>
-            }
-        });
-    </script>
-} 

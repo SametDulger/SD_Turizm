@@ -93,7 +93,7 @@ namespace SD_Turizm.Application.Services
             {
                 query = query.Where(p => 
                     p.Name.Contains(searchTerm) || 
-                    p.Description.Contains(searchTerm) ||
+                    (p.Description != null && p.Description.Contains(searchTerm)) ||
                     p.Resource.Contains(searchTerm) ||
                     p.Action.Contains(searchTerm));
             }

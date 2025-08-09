@@ -15,8 +15,7 @@ namespace SD_Turizm.Core.Entities
         [MaxLength(200)]
         public string Region { get; set; } = string.Empty;
         
-        [MaxLength(500)]
-        public string Description { get; set; } = string.Empty;
+
         
         public virtual ICollection<TransferPrice> Prices { get; set; }
         

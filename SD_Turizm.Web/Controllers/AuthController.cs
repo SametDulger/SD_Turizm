@@ -36,8 +36,7 @@ namespace SD_Turizm.Web.Controllers
 
             try
             {
-                var loginRequest = new LoginRequestDto { Username = username, Password = password };
-                var loginResponse = await _authApiService.LoginAsync(loginRequest);
+                var loginResponse = await _authApiService.LoginAsync(username, password);
                 
                 if (loginResponse?.Token != null)
                 {

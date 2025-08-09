@@ -3,19 +3,147 @@
     ViewData["Title"] = "Satış Raporu";
 }
 
+<style>
+    @@media print {
+        .no-print { display: none !important; }
+        .report-header { border-bottom: 3px solid #007bff; padding-bottom: 20px; margin-bottom: 30px; }
+        .report-section { page-break-inside: avoid; margin-bottom: 30px; }
+        .summary-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; }
+    }
+    
+    .report-header {
+        text-align: center;
+        border-bottom: 3px solid #007bff;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .company-info {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .report-section {
+        margin-bottom: 40px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 5px solid #007bff;
+    }
+    
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .metric-card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 5px solid;
+        text-align: center;
+    }
+    
+    .metric-primary { border-left-color: #007bff; }
+    .metric-success { border-left-color: #28a745; }
+    .metric-warning { border-left-color: #ffc107; }
+    .metric-danger { border-left-color: #dc3545; }
+    .metric-info { border-left-color: #17a2b8; }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .metric-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .sales-list {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .sale-item {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr 1fr 1fr;
+        gap: 20px;
+        align-items: center;
+    }
+    
+    .sale-item:last-child { border-bottom: none; }
+    .sale-item:nth-child(even) { background: #f8f9fa; }
+    
+    .sale-pnr {
+        font-weight: bold;
+        color: #007bff;
+        font-size: 1.1rem;
+    }
+    
+    .sale-customer {
+        font-weight: 600;
+    }
+    
+    .sale-product {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .sale-amount {
+        text-align: right;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .sale-date {
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .profit-positive { color: #28a745; }
+    .profit-negative { color: #dc3545; }
+    
+    .report-footer {
+        margin-top: 50px;
+        padding-top: 30px;
+        border-top: 2px solid #007bff;
+        text-align: center;
+        color: #6c757d;
+    }
+</style>
+
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+    <!-- Header Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4 no-print">
         <div class="d-flex align-items-center">
             <div class="bg-gradient-primary rounded-circle p-3 me-3 shadow-sm">
                 <i class="fas fa-chart-line fa-2x text-white"></i>
             </div>
             <div>
                 <h1 class="h2 mb-0 text-dark fw-bold">Satış Raporu</h1>
-                <p class="text-muted mb-0">Satış istatistiklerini görüntüleyin</p>
+                <p class="text-muted mb-0">Detaylı satış analizi ve istatistikler</p>
             </div>
         </div>
         <div>
-            <button type="button" class="btn btn-primary btn-lg me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
+            <button type="button" class="btn btn-primary btn-lg me-2 shadow-sm" onclick="window.print()">
+                <i class="fas fa-print me-2"></i>Yazdır
+            </button>
+            <button type="button" class="btn btn-success btn-lg me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
                 <i class="fas fa-filter me-2"></i>Filtrele
             </button>
             <a asp-action="Index" class="btn btn-secondary btn-lg shadow-sm">
@@ -23,147 +151,165 @@
             </a>
         </div>
     </div>
-    
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-primary text-white">
-            <h6 class="m-0 fw-bold">
-                <i class="fas fa-calendar me-2"></i>Satış İstatistikleri
-                @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
-                {
-                    <span class="ms-2">(@ViewBag.StartDate.ToString("dd.MM.yyyy") - @ViewBag.EndDate.ToString("dd.MM.yyyy"))</span>
-                }
-            </h6>
-        </div>
-        <div class="card-body">
-            @if (ViewBag.Summary != null)
+
+    <!-- Report Header -->
+    <div class="report-header">
+        <div class="company-info">
+            <h1 class="mb-3">
+                <i class="fas fa-building me-3"></i>SD TURİZM
+            </h1>
+            <h2 class="h3 mb-0">SATIŞ RAPORU</h2>
+            @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
             {
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card border-start border-primary shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
-                                            Toplam Satış
-                                        </div>
-                                        <div class="h5 mb-0 fw-bold text-gray-800">@ViewBag.Summary.TotalSales</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
+                <p class="mb-0 mt-2">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    @ViewBag.StartDate.ToString("dd MMMM yyyy") - @ViewBag.EndDate.ToString("dd MMMM yyyy")
+                </p>
+            }
+            else
+            {
+                <p class="mb-0 mt-2">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Rapor Tarihi: @DateTime.Now.ToString("dd MMMM yyyy")
+                </p>
+            }
+        </div>
+    </div>
+
+    <!-- Executive Summary -->
+    @if (ViewBag.Summary != null)
+    {
+        <div class="report-section">
+            <h3 class="mb-4">
+                <i class="fas fa-chart-bar me-2"></i>
+                Özet İstatistikler
+            </h3>
+            
+            <div class="metric-grid">
+                <div class="metric-card metric-primary">
+                    <div class="metric-value text-primary">@ViewBag.Summary.TotalSales</div>
+                    <div class="metric-label">Toplam Satış Adedi</div>
+                </div>
+                
+                <div class="metric-card metric-success">
+                    <div class="metric-value text-success">₺@ViewBag.Summary.TotalSaleAmount.ToString("N0")</div>
+                    <div class="metric-label">Toplam Satış Tutarı</div>
+                </div>
+                
+                <div class="metric-card metric-warning">
+                    <div class="metric-value text-warning">₺@ViewBag.Summary.TotalPurchaseAmount.ToString("N0")</div>
+                    <div class="metric-label">Toplam Maliyet</div>
+                </div>
+                
+                <div class="metric-card metric-info">
+                    <div class="metric-value text-info">₺@ViewBag.Summary.TotalProfit.ToString("N0")</div>
+                    <div class="metric-label">Net Kâr</div>
+                </div>
+                
+                <div class="metric-card metric-danger">
+                    <div class="metric-value text-danger">
+                        %@(ViewBag.Summary.TotalSaleAmount > 0 ? ((ViewBag.Summary.TotalProfit / ViewBag.Summary.TotalSaleAmount) * 100).ToString("N1") : "0.0")
+                    </div>
+                    <div class="metric-label">Kâr Marjı</div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Sales Details -->
+    @if (ViewBag.Sales != null)
+    {
+        <div class="report-section">
+            <h3 class="mb-4">
+                <i class="fas fa-list-alt me-2"></i>
+                Satış Detayları
+            </h3>
+            
+            <div class="sales-list">
+                <div class="sale-item" style="background: #007bff; color: white; font-weight: bold;">
+                    <div>PNR</div>
+                    <div>Müşteri & Ürün</div>
+                    <div class="text-center">Satış Fiyatı</div>
+                    <div class="text-center">Kâr</div>
+                    <div class="text-center">Tarih</div>
+                </div>
+                
+                @foreach (var sale in ViewBag.Sales)
+                {
+                    var profit = sale.SalePrice - sale.PurchasePrice;
+                    var profitClass = profit >= 0 ? "profit-positive" : "profit-negative";
+                    
+                    <div class="sale-item">
+                        <div class="sale-pnr">@sale.PnrNumber</div>
+                        <div>
+                            <div class="sale-customer">@sale.CustomerName</div>
+                            <div class="sale-product">
+                                <i class="fas fa-tag me-1"></i>@sale.SellerType - @sale.ProductName
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card border-start border-success shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
-                                            Toplam Gelir
-                                        </div>
-                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalSaleAmount.ToString("N2")</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="sale-amount">₺@sale.SalePrice.ToString("N0")</div>
+                        <div class="sale-amount @profitClass">
+                            <i class="fas fa-@(profit >= 0 ? "arrow-up" : "arrow-down") me-1"></i>
+                            ₺@profit.ToString("N0")
                         </div>
+                        <div class="sale-date">@sale.CreatedDate.ToString("dd.MM.yyyy")</div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card border-start border-warning shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
-                                            Toplam Maliyet
-                                        </div>
-                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalPurchaseAmount.ToString("N2")</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card border-start border-danger shadow h-100 py-2">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col mr-2">
-                                        <div class="text-xs fw-bold text-danger text-uppercase mb-1">
-                                            Toplam Kâr
-                                        </div>
-                                        <div class="h5 mb-0 fw-bold text-gray-800">₺@ViewBag.Summary.TotalProfit.ToString("N2")</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
-                                    </div>
-                                </div>
-                            </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Performance Analysis -->
+    @if (ViewBag.Summary != null)
+    {
+        <div class="report-section">
+            <h3 class="mb-4">
+                <i class="fas fa-analytics me-2"></i>
+                Performans Analizi
+            </h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="metric-card">
+                        <h5>Ortalama Satış Tutarı</h5>
+                        <div class="metric-value text-primary">
+                            ₺@(ViewBag.Summary.TotalSales > 0 ? (ViewBag.Summary.TotalSaleAmount / ViewBag.Summary.TotalSales).ToString("N0") : "0")
                         </div>
                     </div>
                 </div>
-            }
-            
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h6 class="m-0 fw-bold text-primary">Satış Detayları</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped" id="salesTable">
-                                    <thead>
-                                        <tr>
-                                            <th>PNR</th>
-                                            <th>Müşteri</th>
-                                            <th>Ürün Tipi</th>
-                                            <th>Ürün Adı</th>
-                                            <th>Satış Fiyatı</th>
-                                            <th>Alış Fiyatı</th>
-                                            <th>Kâr</th>
-                                            <th>Tarih</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @if (ViewBag.Sales != null)
-                                        {
-                                            @foreach (var sale in ViewBag.Sales)
-                                            {
-                                                <tr>
-                                                    <td>@sale.PnrNumber</td>
-                                                    <td>@sale.CustomerName</td>
-                                                    <td>@sale.SellerType</td>
-                                                    <td>@sale.ProductName</td>
-                                                    <td>₺@sale.SalePrice.ToString("N2")</td>
-                                                    <td>₺@sale.PurchasePrice.ToString("N2")</td>
-                                                    <td>₺@((sale.SalePrice - sale.PurchasePrice).ToString("N2"))</td>
-                                                    <td>@sale.CreatedDate.ToString("dd.MM.yyyy")</td>
-                                                </tr>
-                                            }
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
+                <div class="col-md-6">
+                    <div class="metric-card">
+                        <h5>Ortalama Kâr</h5>
+                        <div class="metric-value text-success">
+                            ₺@(ViewBag.Summary.TotalSales > 0 ? (ViewBag.Summary.TotalProfit / ViewBag.Summary.TotalSales).ToString("N0") : "0")
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    }
+
+    <!-- Report Footer -->
+    <div class="report-footer">
+        <p>
+            <i class="fas fa-calendar me-2"></i>
+            Rapor Oluşturma Tarihi: @DateTime.Now.ToString("dd MMMM yyyy HH:mm")
+        </p>
+        <p class="mb-0">
+            <i class="fas fa-building me-2"></i>
+            SD Turizm - Satış Raporu Sistemi
+        </p>
     </div>
 </div>
 
-<!-- Filtre Modal -->
+<!-- Filter Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Rapor Filtreleri</h5>
+                <h5 class="modal-title">
+                    <i class="fas fa-filter me-2"></i>Rapor Filtreleri
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="get">
@@ -171,101 +317,31 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Başlangıç Tarihi</label>
+                                <label class="form-label">
+                                    <i class="fas fa-calendar me-1"></i>Başlangıç Tarihi
+                                </label>
                                 <input type="date" class="form-control" name="startDate" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" />
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Bitiş Tarihi</label>
+                                <label class="form-label">
+                                    <i class="fas fa-calendar me-1"></i>Bitiş Tarihi
+                                </label>
                                 <input type="date" class="form-control" name="endDate" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Satıcı Tipi</label>
-                                <select class="form-select" name="sellerType">
-                                    <option value="">Tümü</option>
-                                    @if (ViewBag.ProductTypes != null)
-                                    {
-                                        @foreach (var productType in ViewBag.ProductTypes)
-                                        {
-                                            <option value="@productType.GetProperty("code").GetString()">@productType.GetProperty("name").GetString()</option>
-                                        }
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Para Birimi</label>
-                                <select class="form-select" name="currency">
-                                    <option value="">Tümü</option>
-                                    @if (ViewBag.Currencies != null)
-                                    {
-                                        @foreach (var currency in ViewBag.Currencies)
-                                        {
-                                            <option value="@currency.GetProperty("code").GetString()">
-                                                @currency.GetProperty("flag").GetString() @currency.GetProperty("code").GetString() - @currency.GetProperty("name").GetString()
-                                            </option>
-                                        }
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">PNR Numarası</label>
-                                <input type="text" class="form-control" name="pnrNumber" />
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Dosya Kodu</label>
-                                <input type="text" class="form-control" name="fileCode" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Acente Kodu</label>
-                                <input type="text" class="form-control" name="agencyCode" />
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Cari Kodu</label>
-                                <input type="text" class="form-control" name="cariCode" />
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-primary">Filtrele</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>İptal
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>Filtrele
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#salesTable').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
-                },
-                pageLength: 25,
-                order: [[7, 'desc']]
-            });
-        });
-    </script>
-} 

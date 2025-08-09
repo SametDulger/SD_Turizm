@@ -12,8 +12,7 @@ namespace SD_Turizm.Core.Entities
         [MaxLength(100)]
         public string RoomTypes { get; set; } = string.Empty; // SGL, DBL, TRP, DBL+1, TRP+1
         
-        [MaxLength(500)]
-        public string Description { get; set; } = string.Empty;
+
         
         public virtual ICollection<CruisePrice> Prices { get; set; }
         

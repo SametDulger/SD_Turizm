@@ -52,7 +52,7 @@ namespace SD_Turizm.Core.Entities
         
         public virtual ICollection<SaleItem> SaleItems { get; set; }
         public virtual ICollection<SalePerson> SalePersons { get; set; }
-        public virtual Address Address { get; set; } = null!;
+        public virtual Address? Address { get; set; }
         
         public Sale()
         {

@@ -20,7 +20,7 @@ namespace SD_Turizm.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var entities = await _addressApiService.GetAllAddressesAsync() ?? new List<AddressDto>();
-            await LoadLookupData();
+            LoadLookupData();
             return View(entities);
         }
 
@@ -109,7 +109,7 @@ namespace SD_Turizm.Web.Controllers
             return View();
         }
 
-        private async Task LoadLookupData()
+        private void LoadLookupData()
         {
             // Basic lookup data if needed for address forms
             // Currently no specific lookup data needed for addresses

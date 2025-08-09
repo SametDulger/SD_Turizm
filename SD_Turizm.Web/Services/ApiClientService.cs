@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using SD_Turizm.Web.Models;
 
 namespace SD_Turizm.Web.Services
 {
@@ -95,41 +96,60 @@ namespace SD_Turizm.Web.Services
 
         public async Task<HttpResponseMessage> GetResponseAsync(string endpoint)
         {
-            AddAuthorizationHeader();
-            return await ExecuteWithRetryAsync(() => _httpClient.GetAsync(endpoint));
+            return await ExecuteWithRetryAsync(async () => {
+                using var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
+                AddAuthToRequest(request);
+                return await _httpClient.SendAsync(request);
+            });
         }
 
         public async Task<HttpResponseMessage> PostResponseAsync(string endpoint, object data)
         {
-            AddAuthorizationHeader();
-            var json = JsonSerializer.Serialize(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            return await ExecuteWithRetryAsync(() => _httpClient.PostAsync(endpoint, content));
+            return await ExecuteWithRetryAsync(async () => {
+                using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+                var json = JsonSerializer.Serialize(data);
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                AddAuthToRequest(request);
+                return await _httpClient.SendAsync(request);
+            });
         }
 
         public async Task<HttpResponseMessage> PutResponseAsync(string endpoint, object data)
         {
-            AddAuthorizationHeader();
-            var json = JsonSerializer.Serialize(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            return await ExecuteWithRetryAsync(() => _httpClient.PutAsync(endpoint, content));
+            return await ExecuteWithRetryAsync(async () => {
+                using var request = new HttpRequestMessage(HttpMethod.Put, endpoint);
+                var json = JsonSerializer.Serialize(data);
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                AddAuthToRequest(request);
+                return await _httpClient.SendAsync(request);
+            });
         }
 
         public async Task<HttpResponseMessage> DeleteResponseAsync(string endpoint)
         {
-            AddAuthorizationHeader();
-            return await ExecuteWithRetryAsync(() => _httpClient.DeleteAsync(endpoint));
+            return await ExecuteWithRetryAsync(async () => {
+                using var request = new HttpRequestMessage(HttpMethod.Delete, endpoint);
+                AddAuthToRequest(request);
+                return await _httpClient.SendAsync(request);
+            });
         }
 
-        private void AddAuthorizationHeader()
+        private void AddAuthToRequest(HttpRequestMessage request)
         {
             try
             {
                 var token = _httpContextAccessor.HttpContext?.Session.GetString("JWTToken");
                 if (!string.IsNullOrEmpty(token))
                 {
-                    _httpClient.DefaultRequestHeaders.Authorization = 
+                    request.Headers.Authorization = 
                         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                    
+                    _logger.LogWarning("🚀 MANUAL AUTH HEADER INJECTION: {TokenPreview}", 
+                        token.Length > 20 ? token.Substring(0, 20) + "..." : token);
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ NO TOKEN FOUND IN SESSION!");
                 }
             }
             catch (Exception ex)

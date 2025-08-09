@@ -6,7 +6,7 @@ namespace SD_Turizm.Core.Entities
         public string Name { get; set; } = string.Empty; // Otel, Tur, Transfer, Rent A Car, Rehber, Uçak, Gemi
         public string Description { get; set; } = string.Empty;
         public string Icon { get; set; } = string.Empty; // Font Awesome icon class
-        public bool IsActive { get; set; } = true;
+
         public int DisplayOrder { get; set; }
     }
 }

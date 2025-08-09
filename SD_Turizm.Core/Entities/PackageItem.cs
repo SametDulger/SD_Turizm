@@ -19,6 +19,7 @@ namespace SD_Turizm.Core.Entities
         public string Description { get; set; } = string.Empty;
         
         public int? VendorId { get; set; }
+        public virtual Vendor? Vendor { get; set; }
         public string VendorType { get; set; } = string.Empty; // Hotel, TourOperator, etc.
         
         // Web view'lar için ek property'ler

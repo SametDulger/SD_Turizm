@@ -5,7 +5,7 @@ namespace SD_Turizm.Core.Entities
         public string Code { get; set; } = string.Empty; // OB, BB, HB, FB, AI, UAI
         public string Name { get; set; } = string.Empty; // Oda Kahvaltı, Yarım Pansiyon, etc.
         public string Description { get; set; } = string.Empty;
-        public bool IsActive { get; set; } = true;
+
         public int DisplayOrder { get; set; }
     }
 }
