@@ -177,6 +177,14 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
+// Add Response Compression
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+});
+
 // Add CORS
 builder.Services.AddCors(options =>
 {
@@ -243,6 +251,7 @@ app.UseMiddleware<GlobalExceptionHandler>();
 // Add Validation Middleware
 app.UseValidation();
 
+app.UseResponseCompression();
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
